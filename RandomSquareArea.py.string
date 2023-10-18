@@ -1,0 +1,1 @@
+import randomN = 1000000sum = 0for i in range(1,N):    x1 = random.random()    y1 = random.random()    x2 = random.random()    y2 = random.random()    sum += abs((x1-x2)*(y1-y2))print(sum/N)

@@ -1,0 +1,26 @@
+[
+    {
+        "asset": "ip/52.213.141.246",
+        "asset_value": "52.213.141.246",
+        "asset_type": "ip",
+        "context": "scan/tesco--customer--0003",
+        "module": "openvas",
+        "data": "<clovis>:big-KTf7dNKfUoBqSVOIZ546N61-NtLhE7lL92QOY4bL6MNgwnpLpp-_2Q",
+        "command_id": "5f0k1g-x5l37c-ym9ujh",
+        "config": "Full and fast qod_30",
+        "is_bad": "false",
+        "filename_in_bucket": "openvas/2021-08-05/02-35-49--openvas-impolite-33b98018ed--YkhAaO84bV--0042.raw",
+        "worker_id": "openvas-impolite-33b98018ed",
+        "worker_ip_address": "217.138.196.21",
+        "start_time": "2021-08-05 01:30:53.562",
+        "end_time": "2021-08-05 02:35:01.426",
+        "expire_at": "Null",
+        "ingestion_time": "2021-08-05 02:36:40",
+        "infra_details": "{\"vpn_url\": \"https://account.protonvpn.com/api/vpn/config?APIVersion=3&Category=Server&Platform=Linux&Protocol=tcp&Tier=2\", \"vpn_username\": \"j8k12zPeZg1257lO0kQEb6Hh6y6DeUgz+nst\", \"vpn_server_file\": \"uk-17.protonvpn.com.tcp.ovpn\", \"cluster_name\": \"Juarez-Prod-1\"}",
+        "engine_data": "{\"creation-time\":{\"$time\":\"2021-08-04T23:26:20.271Z\"}}",
+        "id": "cyco.raw_data--feMKQkm_zh4VI5rJRYgsuLpb7b4finfUeLI4nEeud9VSNLxL8slaHg",
+        "data_size": 580849,
+        "priority": 213,
+        "error_description": ""
+    }
+]

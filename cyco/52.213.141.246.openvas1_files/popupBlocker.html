@@ -1,0 +1,2705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>superQuery</title>
+    <meta name="google-site-verification" content="gOc74B_y_ElWuBOCXigp81fnxK_Ll2EPx2pCm0UStgI" />
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Security-Policy" content="object-src 'none';base-uri 'self';script-src 'unsafe-inline' 'self' 'unsafe-eval' http://ajax.googleapis.com https://www.google-analytics.com https://www.google-analytics.com/* https://www.google-analytics.com/analytics.js https://fast.appcues.com https://fast.appcues.com/* https://my.appcues.com https://cdn.firebase.com https://*.firebaseio.com https://*.bluesnap.com https://appcues-quickstart.s3-us-west-2.amazonaws.com https://appcues-quickstart.s3-us-west-2.amazonaws.com/* https://trackcmp.net https://connect.facebook.net https://app.intercom.io https://widget.intercom.io https://js.intercomcdn.com https://*.cloudfront.net https://www.gstatic.com https://static.hotjar.com https://code.jquery.com https://s3.amazonaws.com https://fullstory.com https://*.fullstory.com/* https://fullstory.com/s/fs.js https://edge.fullstory.com/s/fs.js https://fullstory.com/* https://dc.ads.linkedin.com https://px.ads.linkedin.com https://www.googletagmanager.com https://tagmanager.google.com https://tagmanager.google.com/debug https://tagmanager.google.com/* https://www.googletagmanager.com/gtm.js https://analytics.twitter.com https://static.ads-twitter.com https://static.ads-twitter.com/* https://sjs.bizographics.com https://sjs.bizographics.com/* https://www.googleadservices.com/* https://www.googleadservices.com/ https://widget.uservoice.com/* ws.bluesnap.com s3.amazonaws.com ;worker-src 'self' blob:">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="description"
+        content="superQuery - A power SQL IDE for Google BigQuery">
+    <meta name="author" content="The most amazing console on the web">
+
+    <!-- Mobile Meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-url" content="/#!showAsApp" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700" rel="stylesheet">
+    <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/lfckfngaeoheoppemkocjjebloiamfdc">
+
+
+    <!-- Mobile Meta -->
+    <link rel="apple-touch-icon-precomposed" href="/images/ev64x64new.png?v=2" />
+    <link rel="shortcut icon" sizes="196x196" href="/images/ev192x192.png?v=2" />
+    <link rel="icon" sizes="192x192" href="./lib/ev192x192.png?v=2">
+    <link rel="apple-touch-icon" href="./lib/ev64x64new.png?v=2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="application-name" content="superQuery">
+
+    <!--share data-->
+    <meta property="og:title" content="superQuery - A power SQL IDE for Google BigQuery" />
+    <meta property="og:url" content="http://evaluex.io" />
+    <meta property="og:image" content="http://dev.evaluex.io/images/sq-logo.png" />
+    <meta property="og:description"
+        content="Write perfect queries 12X faster. Organize & share your queries. Cut your BigQuery costs by 60%." />
+
+    <link rel="stylesheet" type="text/css" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+<!--    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>-->
+
+    <script type="text/javascript"
+        src="https://ws.bluesnap.com/source/web-sdk/bluesnap.js"></script>
+
+
+    <script async="true" type="text/javascript"
+        src="https://s3.amazonaws.com/earlyparrot-production-scripts/utilities.js"></script>
+
+    <script type="text/javascript"
+        src="https://ws.bluesnap.com/source/web-sdk/bluesnap.js"></script>
+    <script src="//fast.appcues.com/40986.js"></script>
+
+<!--    <script>-->
+<!--        UserVoice = window.UserVoice || [];-->
+<!--        (function() {-->
+<!--            var uv = document.createElement("script");-->
+<!--            uv.type = "text/javascript";-->
+<!--            uv.async = true;-->
+<!--            uv.src = "//widget.uservoice.com/Q8jcpPsIOep8VP7HjvhkA.js";-->
+<!--            var s = document.getElementsByTagName("script")[0];-->
+<!--            s.parentNode.insertBefore(uv, s);-->
+<!--        })();-->
+<!--    </script>-->
+
+    <style>
+        .landingPage {
+            box-sizing: border-box;
+            line-height: initial;
+        }
+
+        #index_extentionPage,
+        #index_payment-made,
+        #index_localstorage {
+            width: 100vw;
+            height: 100vh;
+            background-size: 100% auto;
+            display: none;
+            position: relative;
+        }
+
+        .landingPage_spliter {
+            opacity: 0;
+        }
+
+        .index_extentionPage_img,
+        .index_payment-made_img,
+        .index_localstorage_img {
+            width: 100%;
+            height: 100%;
+            filter: blur(2px);
+            background-position: -100px 0px;
+        }
+
+        .index_extentionPage_boxHolder,
+        .index_payment-made_boxHolder,
+        .index_localstorage_img {
+            height: 100vh;
+            width: 100vw;
+            /*background:rgba(255,255,255,0.7);*/
+            position: fixed;
+            top: 0px;
+            left: 0px;
+        }
+
+        .index_payment-logo {
+            width: 100%
+        }
+
+        .index_payment-logo>img {
+            top: 63px;
+            width: 100px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 62px;
+
+        }
+
+        .index_payment-image {
+            width: 420px;
+            height: 146px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            position: absolute;
+            bottom: 0px;
+        }
+
+        .index_extentionPage_box {
+            width: 970px;
+            height: 500px;
+        }
+
+        .index_localstorage_box {
+            width: 750px;
+            height: 420px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0px 0px 25px #bbbfc8;
+            background: white;
+            border-radius: 12px;
+            transform: translate(-50%, -50%);
+            position: relative;
+            float: left;
+            left: 50%;
+            top: 50%;
+        }
+
+        .index_localstorage_bg_img {
+            position: absolute;
+            right: 0;
+        }
+
+        .index_payment-made_box {
+            width: 420px;
+            height: 400px;
+        }
+
+        .index_extentionPage_box {
+            width: 720px;
+            height: 420px;
+            object-fit: contain;
+            transform: rotate(-59deg);
+        }
+
+        .index_extentionPage_box,
+        .index_payment-made_box {
+            display: flex;
+            overflow: hidden;
+            /* padding: 20px; */
+            box-shadow: 0px 0px 25px #bbbfc8;
+            background: white;
+            border-radius: 12px;
+            transform: translate(-50%, -50%);
+            position: relative;
+            float: left;
+            left: 50%;
+            top: 50%;
+        }
+
+        .index_extentionPage-logo {
+            position: fixed;
+            top: 76px;
+            left: 300px;
+            width: 200px
+        }
+
+        .index_extentionPage-imgLeft {
+            position: fixed;
+            right: -206px;
+
+            width: 720px;
+            height: 420px;
+            object-fit: contain;
+
+        }
+
+
+        .LandingPageTeam_loginButtonLast {
+            margin-bottom: 50px;
+        }
+
+        .index_payment-made_box_title {
+            width: 100%;
+            height: 44px;
+            object-fit: contain;
+            font-family: Roboto;
+            font-size: 28px;
+            font-weight: 900;
+            font-style: normal;
+            font-stretch: normal;
+            line-height: 1.57;
+            text-align: center;
+            color: #2c1e72;
+            margin-top: 16.5px;
+        }
+
+        .index_extentionPage_box_title {
+            font-size: 44px;
+            font-weight: 900;
+            color: #2c1e72;
+            margin-top: 72px;
+            margin-left: 64px
+        }
+
+        .index_localstorage_box_title {
+            font-size: 44px;
+            font-weight: 900;
+            color: #2c1e72;
+        }
+
+        .index_extentionPage_box_text {
+            font-size: 16px;
+            max-width: 470px;
+            margin-top: 30px;
+            color: #2c1e72;
+            opacity: 0.8;
+            margin-left: 64px;
+            margin-top: 32px;
+            line-height: 24px;
+        }
+
+        .index_localstorage_box_text {
+            font-size: 16px;
+            max-width: 470px;
+            margin-top: 30px;
+        }
+
+        .index_extentionPage_box_button {
+            width: 265px;
+            height: 56px;
+            margin-top: 36px;
+            margin-left: 64px;
+            display: flex;
+            background-color: #2c1e72;
+            box-shadow: 0 4px 24px 0 rgba(11, 0, 64, 0.22);
+            transition: 0.3s all;
+            cursor: pointer;
+            border-radius: 8px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .index_localstorage_box_button {
+            width: auto;
+            height: auto;
+            margin-top: 50px;
+            background-color: #2c1e72;
+            box-shadow: 0 4px 24px 0 rgba(11, 0, 64, 0.22);
+            transition: 0.3s all;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 22px 102px;
+            display: inline-flex;
+        }
+
+        .index_localstorage_box_button .index_localstorage_box_button-text {
+            margin: auto;
+            text-align: center;
+            color: white;
+        }
+
+        .index_localstorage_box_content {
+            position: absolute;
+            top: 54px;
+            left: 64px;
+        }
+
+        .index_extentionPage_box_button:hover {
+            box-shadow: 0 4px 24px 0 rgba(11, 0, 64, 0.52);
+        }
+
+        .index_payment-made_box_button {
+            width: 116px;
+            height: 40px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 28px;
+            display: flex;
+            background-color: #2c1e72;
+            box-shadow: 0 4px 24px 0 rgba(11, 0, 64, 0.32);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .index_payment-made_box_button-icon {}
+
+        .index_extentionPage_box_button .index_extentionPage_box_button-icon,
+        .index_payment-made_box_button-icon {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+            background-color: white;
+            padding: 16px;
+            border-radius: 4px 0px 0px 4px;
+        }
+
+        .index_payment-made_box_button-text {
+            font-size: 20px;
+            font-weight: 500;
+            margin: auto;
+            color: white;
+
+        }
+
+        .index_extentionPage_box_button-text {
+            width: 255px;
+            margin: auto;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            line-height: 24px;
+            padding: 16px;
+            flex: 7.4;
+        }
+
+        .index_extentionPage_box_button {
+            margin-left: 64px;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            flex: 4;
+        }
+
+        .index_extentionPage_box_button .index_extentionPage_box_button-icon .google-icon {
+            height: 24px;
+            width: 24px;
+            margin: auto;
+        }
+
+        .index_extentionPage_box_content,
+        .index_payment-made_box_content {
+            width: 100%;
+            top: 144px;
+        }
+
+        .landingPagePage3 {
+            overflow: hidden;
+            border-bottom: 1px rgb(220, 220, 220) solid;
+        }
+
+        .landingPagePage3_videoHolder {
+            width: 100%;
+            margin-top: 10px;
+            float: left;
+        }
+
+        .landingPagePage3_video {
+            height: 450px;
+            width: 65%;
+            transform: translate(-50%, 0%);
+            box-shadow: 0px 0px 20px rgb(170, 170, 170);
+            border: none;
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .landingPagePage3_right {
+            height: 100vh;
+            width: 50%;
+            position: relative;
+            float: right;
+        }
+
+        .landingPagePage3_left {
+            height: 100vh;
+            width: 50%;
+            background: linear-gradient(50deg, #8c2cd3, #dd47aa);
+            position: relative;
+            float: left;
+        }
+
+        .landingPagePage3_left_img {
+            width: 700px;
+            transform: translate(0%, -50%);
+            box-shadow: 0px 0px 60px rgb(70, 70, 70);
+            border-radius: 3px;
+            position: absolute;
+            left: 50px;
+            top: 50%;
+            z-index: 2;
+        }
+
+        .landingPagePage3_left_backgroundWhite {
+            width: 0px;
+            border-top: 100vh solid transparent;
+            border-left: 170px solid transparent;
+            border-right: 170px solid white;
+            position: absolute;
+            right: 0px;
+        }
+
+        .index_progress_logo {
+            font-family: Roboto;
+            font-size: 30px;
+            position: relative;
+        }
+
+        .index_progress_logo img {
+            width: 100%;
+            margin-bottom: 20px;
+            vertical-align: middle;
+        }
+
+        .index_progress_logoX {
+            color: #6c206e;
+        }
+
+        .index_animation_container {
+            position: fixed;
+            top: 0;
+            right: 25%;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .landingPage_privacy {
+            width: 100%;
+            height: 100%;
+            display: none;
+            background: rgba(255, 255, 255, 0.8);
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            z-index: 100000;
+        }
+
+        .landingPage_privacy_holder {
+            width: 500px;
+            box-shadow: 0px 0px 25px #bbbfc8;
+            background: white;
+            border-radius: 12px;
+            box-sizing: border-box;
+            padding: 30px 20px;
+            text-align: center;
+            transform: translate(-50%, -50%);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+        }
+
+        .landingPage_privacy_title {
+            width: 100%;
+            font-size: 25px;
+            font-weight: bold;
+            float: left;
+        }
+
+        .landingPage_privacy_text {
+            width: 100%;
+            font-size: 18px;
+            margin-top: 10px;
+            float: left;
+        }
+
+        .landingPage_privacy_lock {
+            width: 100%;
+            color: rgb(70, 70, 70);
+            text-align: center;
+            font-size: 80px;
+            float: left;
+        }
+
+        .landingPage_privacy_button {
+            padding: 11px 0px;
+            width: 220px;
+            text-align: center;
+            color: white;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: 0.3s all;
+            cursor: pointer;
+            font-size: 18px;
+            background: linear-gradient(90deg, #66cc99, #a0d288);
+            transform: translate(-50%, 0%);
+            margin-top: 15px;
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .landingPage_privacy_button:hover {
+            transform: translate(-50%, 0%) scale(1.05);
+        }
+
+        .index_animation_container span {
+            color: rgb(160, 12, 242);
+            display: block;
+            font-size: 18px;
+            /*font-family: 'Helvetica';*/
+            text-shadow: 0 0 1px white;
+            position: absolute;
+            user-select: none;
+            pointer-events: none;
+            cursor: default;
+            z-index: 1;
+            opacity: 0;
+            will-change: transform, opacity;
+            animation-timing-function: ease-out;
+            animation-name: move;
+        }
+
+        @keyframes move {
+            0% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
+
+            25% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            75% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 0;
+                transform: none;
+            }
+        }
+
+        #index_progress {
+            width: 100%;
+            height: 100%;
+            background: white;
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            z-index: 123123123;
+        }
+
+        .index_progressHolder {
+            width: 350px;
+            box-sizing: initial;
+            line-height: normal;
+            text-align: center;
+            font-size: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-family: Roboto;
+            z-index: 2123123123123;
+            /*box-shadow: 0px 0px 15px rgb(200,200,200);*/
+            transform: translate(-50%, -50%);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+        }
+
+        #index_progress_border {
+            width: 0%;
+            height: 3px;
+            box-shadow: 0px 0px 15px #f1189b;
+            border: 5px;
+            background: linear-gradient(225deg, #f1189b, rgb(160, 12, 242));
+            transition: 0.3s all;
+            float: left;
+        }
+
+        #index_progress_text {
+            width: 100%;
+            margin-top: 10px;
+            opacity: 0;
+            background: -webkit-linear-gradient(#dd47aa, #8c2cd3);
+            font-weight: 500;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            float: left;
+        }
+
+        .index_progress_title {
+            width: 100%;
+            color: #5b6369;
+            margin-bottom: 5px;
+            text-align: center;
+            float: left;
+        }
+        .index_progress_title i{
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+        }
+        /*landing page*/
+
+        body {
+            margin: 0px;
+            padding: 0px;
+            font-family: Roboto !important;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #index_body {
+            width: 100vw;
+            height: 100vh;
+            overflow: scroll;
+        }
+
+        landingPage {
+            width: 100%;
+            color: #5b6369;
+            font-family: Roboto;
+            float: left;
+        }
+
+        .landingPage_notHaveProjects {
+            width: 100%;
+            height: 100%;
+            display: none;
+            background: rgba(255, 255, 255, 0.8);
+            position: fixed;
+            z-index: 1000000;
+            top: 0px;
+            left: 0px;
+        }
+
+        .landingPage_notHaveProjects_box {
+            width: 300px;
+            padding: 20px;
+            box-shadow: 0px 0px 25px #bbbfc8;
+            background: white;
+            border-radius: 12px;
+            background: white;
+            transform: translate(-50%, -50%);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+        }
+
+        .landingPage_notHaveProjects_box_text {
+            width: 100%;
+            text-align: center;
+            float: left;
+        }
+
+        .landingPage_notHaveProjects_box_button {
+            width: 70px;
+            transform: translate(-50%, 0%);
+            margin-top: 20px;
+            padding: 5px 20px;
+            text-align: center;
+            border-radius: 10px;
+            color: white;
+            position: relative;
+            float: left;
+            left: 50%;
+            box-shadow: 0px 0px 5px rgb(160, 12, 242);
+            background: linear-gradient(225deg, #dc4eee, rgb(160, 12, 242));
+            border-radius: 20px;
+            transition: 0.3s all;
+            cursor: pointer;
+        }
+
+        .landingPage_notHaveProjects_box_button:hover {
+            box-shadow: 0px 0px 10px rgb(160, 12, 242);
+            transform: scale(1.05) translate(-50%, 0%);
+        }
+
+        .landingPage_globalRow {
+            width: 100%;
+            float: left;
+        }
+
+        .landingPage_globalText {
+            background: -webkit-linear-gradient(#dd47aa, #8c2cd3);
+            font-weight: 500;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .landingPage_spliter {
+            width: 1080px;
+            transform: translate(-50%, 0%);
+            position: absolute;
+            border-top: 1px rgb(210, 210, 210) solid;
+            top: 0px;
+            left: 50%;
+        }
+
+        .landingPage_globalText:before {
+            background: -webkit-linear-gradient(#dd47aa, #8c2cd3);
+            font-weight: 500;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .landingPage_notBlur {
+            transition: 0.3s all;
+        }
+
+        .landingPage_menuButton {
+            height: 20px;
+            width: 30px;
+            position: absolute;
+            cursor: pointer;
+            top: 15px;
+            right: 25px;
+            z-index: 3;
+        }
+
+        .landingPage_menuButtonClicked .landingPage_menuButton_line {
+            background: black;
+        }
+
+        .landingPage_menuButtonClicked .landingPage_menuButton_line2 {
+            opacity: 0;
+        }
+
+        .landingPage_menuButtonClicked .landingPage_menuButton_line1 {
+            transform: rotate(45deg);
+            top: 8px;
+        }
+
+        .landingPage_menuButtonClicked .landingPage_menuButton_line3 {
+            transform: rotate(-45deg);
+            top: 8px;
+        }
+
+        .landingPage_menuButtonClicked {
+            position: fixed;
+        }
+
+        .landingPage_menu {
+            width: 0px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+            transition: 0.3s all;
+            box-shadow: 0px 0px 10px rgb(150, 150, 150);
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            z-index: 2;
+        }
+
+        .landingPage_menuOpen {
+            width: 300px;
+            position: fixed;
+        }
+
+        .landingPage_menu_itemHolder {
+            width: 300px;
+            position: relative;
+            float: left;
+            top: 100px;
+        }
+
+        .landingPage_menu_itemHolder a,
+        .landingPage_menu_itemHolder a:hover,
+        .landingPage_menu_itemHolder a:visited {
+            color: black;
+            text-decoration: none;
+        }
+
+        .landingPage_menu_item {
+            width: 100%;
+            font-size: 22px;
+            text-align: center;
+            margin-top: 30px;
+            transition: 0.3s all;
+            position: relative;
+            float: left;
+        }
+
+        .landingPage_menu_item:hover {
+            transform: scale(1.05);
+        }
+
+        .landingPage_menu_item:first-child {
+            margin-top: 0px;
+        }
+
+        .landingPage_menuButton_line {
+            width: 100%;
+            height: 3px;
+            background: white;
+            border-radius: 5px;
+            transition: 0.3s all;
+            position: absolute;
+            float: left;
+        }
+
+        .landingPage_menuButton_line2 {
+            margin-top: -1.5px;
+            border-radius: 5px;
+            top: 50%;
+        }
+
+        .landingPage_menuButton_line3 {
+            bottom: 0px;
+        }
+
+        .landingPage_header {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            z-index: 10000;
+        }
+
+        .landingPageFirst {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            float: left;
+        }
+
+        .landingPage_logo {
+            font-size: 30px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.8);
+            float: left;
+            z-index: 10000;
+        }
+
+        .landingPage_logo1 {
+            width: 250px;
+            position: relative;
+            float: left;
+            top: 5px;
+            left: 5px;
+        }
+
+        .landingPage_logo1 img {
+            width: 100%;
+        }
+
+        .landingPage_logoX {
+            color: rgb(160, 12, 242);
+        }
+
+        .landingPage_login {
+            color: white;
+            border: 1px white solid;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s all;
+            font-size: 15px;
+            position: absolute;
+            top: 11px;
+            right: 80px;
+            z-index: 1000;
+        }
+
+        .landingPage_login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .landingPage_loginActive {
+            color: black;
+            border: 1px black solid;
+        }
+
+        .landingPage_left {
+            width: 50%;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            float: left;
+        }
+
+        .landingPage_left_main {
+            width: 650px;
+            transform: translate(-50%, -50%);
+            margin-top: -50px;
+            position: absolute;
+            float: left;
+            top: 50%;
+            left: 50%;
+        }
+
+        .landingPage_left_title {
+            width: 100%;
+            font-weight: bold;
+            color: #6b6b6b;
+            color: rgb(70, 70, 70);
+            font-size: 43px;
+            margin-bottom: 10px;
+            line-height: 45px;
+            position: relative;
+            float: left;
+        }
+
+        .landingPage_left_subTitle {
+            font-size: 23px;
+            margin-bottom: 50px;
+            color: rgb(150, 150, 150);
+            float: left;
+        }
+
+        .landingPage_right {
+            width: 50%;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(50deg, #dd47aa, #8c2cd3);
+            position: relative;
+            right: 0px;
+        }
+
+        .landingPage_right_background {
+            width: auto;
+            filter: blur(15px);
+            max-height: 100%;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+
+        .landingPage_right_backgroundWhite {
+            width: 0px;
+            border-bottom: 100vh solid transparent;
+            border-right: 170px solid transparent;
+            border-left: 170px solid white;
+            position: absolute;
+            left: 0px;
+        }
+
+        .selected-companies {
+            padding: 70px 0;
+            display: flex;
+            justify-content: space-between;
+            overflow: hidden;
+            border-top: 1px rgb(220, 220, 220) solid;
+            border-bottom: 1px rgb(220, 220, 220) solid;
+        }
+
+        .selected-companies-border {
+            display: none;
+        }
+
+        /*.landingPage_Carousel_section_chart_mac {*/
+
+        /*height: 650px;*/
+
+        /*width: 800px;*/
+
+        /*!*background: url('/images/browser.png');*!*/
+
+        /*background-size: 100% auto;*/
+
+        /*background-position: top;*/
+
+        /*background-repeat: no-repeat;*/
+
+        /*margin-top:0px;*/
+
+        /*position: relative;*/
+
+        /*float:right;*/
+
+        /*top:90px;*/
+
+        /*top: 0px;*/
+
+        /*}*/
+
+        .landingPage_Carousel_section_chart {
+            height: 600px;
+            width: 800px;
+            transform: translate(0%, -50%);
+            position: absolute;
+            top: 50%;
+            right: 0px;
+        }
+
+        .landingPage_Carousel_section_chart_mac {
+            width: 830px;
+            position: relative;
+            top: 55px;
+            left: 42px;
+        }
+
+        /*.landingPage_Carousel_section_chart_img {*/
+
+        /*!*width: 740px;*!*/
+
+        /*width:calc(100% - 60px);*/
+
+        /*box-shadow: 0px 0px 60px rgb(70,70,70);*/
+
+        /*border-radius: 3px;*/
+
+        /*height: auto;*/
+
+        /*!*background: url('/images/dashboard8.jpg');*!*/
+
+        /*!*background-size: 100% auto;*!*/
+
+        /*position: absolute;*/
+
+        /*float: left;*/
+
+        /*left: 30px;*/
+
+        /*top:52px;*/
+
+        /*}*/
+
+        .landingPage_Carousel_section_chart_img {
+            width: 100%;
+            box-shadow: 0px 0px 60px rgb(70, 70, 70);
+            border-radius: 3px;
+        }
+
+        .landingPage_loginButton {
+            float: left;
+            max-width: 660px;
+            width: 100%;
+        }
+
+        .landingPage_extention {
+            width: 100%;
+            display: none;
+            color: rgb(150, 150, 150);
+            font-size: 17px;
+            cursor: pointer;
+            transition: 0.3s all;
+            text-decoration: none;
+            position: absolute;
+            bottom: -65px;
+            left: 0px;
+            margin-left: -300px;
+            left: 50%;
+        }
+
+        .landingPage_extention:hover {
+            text-decoration: none;
+            color: #8c2cd3;
+        }
+
+        .landingPage_extention img {
+            width: 30px;
+            margin-right: 10px;
+            position: relative;
+            float: left;
+            top: -10px;
+        }
+
+        .landingPage_loginButtonGoToDashboard {
+            display: none;
+        }
+
+        .landingPage_loginButton_input {
+            width: 290px;
+            padding: 10px 30px;
+            border-radius: 10px;
+            background-color: #f5f5f5;
+            text-align: left;
+            border: 1px solid #bbb;
+            font-size: 18px;
+            border-radius: 30px;
+            overflow: visible;
+            transition: 0.3s all;
+            margin-top: 15px;
+            margin-right: 18px;
+            float: left;
+            z-index: 10;
+        }
+
+        .landingPage_loginButton_input::placeholder {
+            color: rgb(150, 150, 150);
+        }
+
+        .landingPage_loginButton_input:focus {
+            color: rgb(160, 12, 242);
+            background: white;
+            outline: none;
+            transform: scale(1.03);
+        }
+
+        .landingPage_loginButton_button {
+            width: 280px;
+            text-align: center;
+            color: white;
+            border-radius: 30px;
+            transition: 0.3s all;
+            cursor: pointer;
+            font-size: 18px;
+            background: linear-gradient(90deg, #66cc99, #a0d288);
+            padding: 11px 0px 11px 20px;
+            box-sizing: border-box;
+            position: relative;
+            float: left;
+            top: 15px;
+        }
+
+        .landingPage_loginButton_button:hover {
+            transform: scale(1.05);
+        }
+
+        .landingPage_loginButton_button_img {
+            width: 75px;
+            height: 75px;
+            background: white;
+            padding: 2px;
+            border-radius: 50%;
+            border: 1px white solid;
+            box-sizing: border-box;
+            transform: translate(0%, -50%);
+            position: absolute;
+            left: -20px;
+            top: 50%;
+        }
+
+        .landingPage_loginButton_error {
+            width: 100%;
+            color: rgb(234, 66, 98);
+            margin-top: 5px;
+            font-weight: 500;
+            display: none;
+            transition: 0.3s all;
+            position: relative;
+            float: left;
+            left: 10px;
+        }
+
+        .landingPage_left_arrrow {
+            font-size: 40px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+        }
+
+        /*.landingPage_companies {*/
+
+        /*width: 100%;*/
+
+        /*padding: 60px 0px;*/
+
+        /*position: relative;*/
+
+        /*float: left;*/
+
+        /*}*/
+
+        /*.landingPage_companies_title {*/
+
+        /*width: 100%;*/
+
+        /*text-align: center;*/
+
+        /*font-weight: bold;*/
+
+        /*color: #6b6b6b;*/
+
+        /*font-size: 48px;*/
+
+        /*margin-bottom: 20px;*/
+
+        /*float: left;*/
+
+        /*}*/
+
+        .landingPage_companies_number {
+            width: 100%;
+            font-size: 40px;
+            text-align: center;
+            float: left;
+        }
+
+        .landingPage_companies_numberHolder {
+            transform: translate(-50%, 0%);
+            padding: 10px 30px;
+            border-radius: 10px;
+            position: relative;
+            margin-top: 20px;
+            float: left;
+            left: 50%;
+            z-index: 1;
+        }
+
+        .landingPage_companies_number .landingPage_companies_numberText {
+            color: rgb(120, 120, 120);
+            font-size: 25px;
+        }
+
+        .landingPage_companies_number_num {
+            background: -webkit-linear-gradient(#dd47aa, #8c2cd3);
+            font-weight: 500;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /*.landingPage_companies_imagesHolder{*/
+
+        /*width:100%;*/
+
+        /*float:left;*/
+
+        /*}*/
+
+        /*.landingPage_companies_images {*/
+
+        /*margin-top:60px;*/
+
+        /*transform: translate(-50%,0%);*/
+
+        /*position: relative;*/
+
+        /*float: left;*/
+
+        /*left:50%;*/
+
+        /*}*/
+
+        .landingPage_companies_images_img {
+            height: 60px;
+            margin: 0px 20px;
+            position: relative;
+            float: left;
+        }
+
+        .landingPage_rowForMobile {
+            display: inline;
+        }
+
+        footer {
+            width: 100%;
+            border-top: 1px rgb(240, 240, 240) solid;
+            text-align: center;
+            padding: 10px 0px;
+            float: left;
+        }
+
+        footer i {
+            color: #b83c36;
+        }
+
+        .landingPage_mobile {
+            display: none;
+        }
+
+        @media screen and (max-width: 1830px) {
+            .selected-companies .landingPage-xl-hide {
+                display: none;
+            }
+        }
+
+        @media screen and (max-width: 1650px) {
+            .selected-companies .landingPage-large-hide {
+                display: none;
+            }
+        }
+
+        @media screen and (max-width: 1550px) {
+            .landingPage_Carousel_section_chart_mac {
+                width: 800px;
+                position: relative;
+                top: 50px;
+                left: 185px;
+            }
+
+            .landingPagePage3_left_img {
+                width: 650px;
+            }
+        }
+
+        @media screen and (max-width: 1475px) {
+            .selected-companies .landingPage-medium-hide {
+                display: none;
+            }
+        }
+
+        @media screen and (max-width: 1300px) {
+            .landingPage_left {
+                overflow: inherit;
+                z-index: 10;
+            }
+
+            .selected-companies {
+                border: none;
+            }
+
+            .landingPagePage3_left {
+                display: none;
+            }
+
+            .landingPagePage3_right {
+                width: 100%;
+                float: left;
+            }
+
+            .landingPagePage3_left_img {
+                width: 500px;
+            }
+
+            .landingPage_left_main {
+                transform: translate(0%, -50%);
+                left: 40px;
+            }
+
+            .landingPage_computer {
+                display: none;
+            }
+
+            .landingPage_mobile {
+                display: block;
+            }
+
+            .landingPage_Carousel_section_chart_mac {
+                width: 600px;
+                top: 120px;
+                left: 310px;
+            }
+
+            .landingPage_Carousel_section_chart_img {
+                width: calc(100% - 38px);
+                height: auto;
+                /*background: url(/images/dashboard8.jpg);*/
+                background-size: 100% auto;
+                position: absolute;
+                float: left;
+                left: 19px;
+                top: 33px;
+            }
+        }
+
+        @media screen and (min-width: 1300px) and (max-width: 1550px) {
+            .landingPage_Carousel_section_chart_mac {
+                width: 745px;
+                position: relative;
+                top: 50px;
+                left: 185px;
+            }
+        }
+
+        @media screen and (min-width: 1450px) and (max-width: 1550px) {
+            .landingPage_Carousel_section_chart_mac {
+                width: 745px;
+                position: relative;
+                top: 50px;
+                left: 110px;
+            }
+        }
+
+        @media screen and (max-width: 1175px) {
+            .selected-companies .landingPage-small-hide {
+                display: none;
+            }
+        }
+
+        .landingPagePage3 {
+            width: 100%;
+            /*padding: 120px 0px 0px 0px;*/
+            color: #5b6369;
+            position: relative;
+            float: left;
+            top: 0px;
+        }
+
+        .landingPagePage3_box {
+            width: 100%;
+            transform: translate(0%, -50%);
+            position: relative;
+            float: left;
+            top: 50%;
+        }
+
+        .landingPagePage3_box_title {
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: rgb(70, 70, 70);
+            font-size: 43px;
+            margin-bottom: 5px;
+            float: left;
+        }
+
+        .landingPagePage3_box_text {
+            width: 800px;
+            padding: 50px;
+            transform: translate(-50%, 0%);
+            text-align: center;
+            font-size: 26px;
+            color: #333;
+            line-height: 32px;
+            position: relative;
+            left: 50%;
+        }
+
+        .landingPagePage3_boxs {
+            transform: translate(-50%, 0%);
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .landingPagePage3_boxs_box {
+            width: 33%;
+            padding: 0px 20px;
+            margin-top: 20px;
+            box-sizing: border-box;
+            position: relative;
+            float: left;
+        }
+
+        .landingPagePage3_boxs_box_comingSoon {
+            transform: rotate(-25deg);
+            margin-left: -60px;
+            padding: 4px 10px;
+            line-height: 15px;
+            box-shadow: 0px 0px 10px rgb(170, 170, 170);
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 12px;
+            background: white;
+            border: 1px rgb(160, 12, 242) solid;
+            position: absolute;
+            top: -5px;
+            left: 50%;
+        }
+
+        .landingPagePage3_boxs_title {
+            width: 100%;
+            font-size: 20px;
+            line-height: 24px;
+            color: black;
+            text-align: center;
+            color: #5b6369;
+            color: black;
+            font-weight: bold;
+            margin-top: 10px;
+            float: left;
+        }
+
+        .landingPagePage3_boxs_boxIconHolder {
+            width: 100%;
+            height: 110px;
+            text-align: center;
+            position: relative;
+            float: left;
+        }
+
+        .landingPagePage3_boxs_box_icon {
+            font-size: 70px;
+            color: #5b6369;
+            text-align: center;
+        }
+
+        .landingPagePage3_boxs_box_iconFirst {
+            font-size: 55px;
+            position: relative;
+            top: 10px;
+        }
+
+        .landingPagePage3_boxs_box_iconAI {
+            font-size: 50px;
+            text-align: center;
+            margin-top: 12px;
+            color: #5b6369;
+            margin-bottom: 12px;
+        }
+
+        .landingPagePage3_boxs_box_img {
+            height: 100%;
+            margin-bottom: 10px;
+        }
+
+        .landingPagePage3_boxs_title_mini {
+            width: 100%;
+            color: rgb(160, 12, 242);
+            text-align: center;
+            float: left;
+        }
+
+        .LandingPageContact {
+            width: 100%;
+            /*height: 100vh;*/
+            min-height: 600px;
+            padding: 120px 0px;
+            position: relative;
+            float: left;
+        }
+
+        .LandingPageContact_center {
+            width: 700px;
+            transform: translate(-50%, 0%);
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .LandingPageContact_left_box_title {
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: #6b6b6b;
+            font-size: 48px;
+            margin-bottom: 20px;
+            float: left;
+        }
+
+        .LandingPageContact_right {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            float: right;
+        }
+
+        .LandingPageContact_right_row {
+            width: 100%;
+            margin-top: 10px;
+            float: left;
+        }
+
+        .LandingPageContact_right_row:first-child {
+            margin-top: 0px;
+        }
+
+        .LandingPageContact_right_row_icon {
+            font-size: 25px;
+            float: left;
+        }
+
+        .LandingPageContact_right_row_text {
+            position: relative;
+            float: left;
+            left: 10px;
+            top: 5px;
+        }
+
+        .LandingPageContact_right_map {
+            width: 400px;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+
+        .LandingPageContact_right_map {
+            width: 400px;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+
+        .LandingPageContact_left_box {
+            width: 370px;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 0px 0px 25px #bbbfc8;
+            background: white;
+            border-radius: 12px;
+            position: relative;
+            float: left;
+        }
+
+        .LandingPageContact_left_box_row {
+            width: 100%;
+            margin-top: 20px;
+            float: left;
+        }
+
+        .LandingPageContact_left_box_row:first-child {
+            margin-top: 0px;
+        }
+
+        .LandingPageContact_left_box_row_input {
+            width: 100%;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            background-color: #f5f5f5;
+            text-align: left;
+            font-size: 15px;
+            border: 1px solid #bbb;
+            border-radius: 30px;
+            overflow: visible;
+            color: rgb(160, 12, 242);
+            transition: 0.3s all;
+            float: left;
+        }
+
+        .LandingPageContact_left_box_row_messageSent {
+            width: 100%;
+            display: none;
+            text-align: center;
+            float: left;
+        }
+
+        .LandingPageContact_left_box_row_input:focus {
+            outline: none;
+            border: 1px rgb(160, 12, 242) solid;
+            transform: scale(1.02);
+        }
+
+        .LandingPageContact_left_box_row_inputBig {
+            height: 120px;
+            border-radius: 10px;
+        }
+
+        .LandingPageContact_left_box_row_text {
+            width: 100%;
+            font-size: 14px;
+            color: #5b6369;
+            margin-bottom: 3px;
+            position: relative;
+            float: left;
+            left: 7px;
+        }
+
+        .LandingPageContact_left_box_row_button {
+            width: 200px;
+            margin-left: -100px;
+            padding: 5px 20px;
+            text-align: center;
+            border-radius: 10px;
+            color: white;
+            box-sizing: border-box;
+            box-shadow: 0px 0px 5px rgb(160, 12, 242);
+            background: linear-gradient(225deg, #dc4eee, rgb(160, 12, 242));
+            border-radius: 20px;
+            transition: 0.3s all;
+            cursor: pointer;
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .LandingPageContact_left_box_row_button:hover {
+            box-shadow: 0px 0px 10px rgb(160, 12, 242);
+            transform: scale(1.05);
+        }
+
+        .LandingPageContact_left_box_error {
+            width: 100%;
+            display: none;
+            text-align: center;
+            color: rgb(234, 66, 98);
+            margin-top: 10px;
+            font-weight: 500;
+            float: left;
+        }
+
+        .LandingPageTeam {
+            min-height: 700px;
+            width: 100%;
+            padding-top: 140px;
+            position: relative;
+            float: left;
+            margin-top: 50px;
+        }
+
+        .LandingPageTeam_title {
+            width: 100%;
+            color: #6b6b6b;
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            float: left;
+        }
+
+        .LandingPageTeam_boxHolder {
+            transform: translate(-50%, 0%);
+            margin-top: 50px;
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .LandingPageTeam_box {
+            width: 300px;
+            padding: 20px;
+            transition: 0.3s all;
+            float: left;
+        }
+
+        .LandingPageTeam_box_imgHolder {
+            width: 200px;
+            height: 200px;
+            transition: 0.3s all;
+            box-shadow: 0px 0px 15px rgb(150, 150, 150);
+            border-radius: 50%;
+            overflow: hidden;
+            transform: translate(-50%, 0%);
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .LandingPageTeam_box_img {
+            width: 100%;
+            height: 100%;
+            background: black;
+            border-radius: 50%;
+        }
+
+        .LandingPageTeam_box_imgBigger {
+            width: 200px;
+            border-radius: 0px;
+            height: auto;
+            position: relative;
+            left: 0px;
+            top: 0px;
+        }
+
+        .LandingPageTeam_box_title,
+        .LandingPageTeam_box_subTitle,
+        .LandingPageTeam_box_subItem {
+            width: 100%;
+            color: #5b6369;
+            text-align: center;
+            float: left;
+        }
+
+        .LandingPageTeam_box_title {
+            color: black;
+            font-weight: 500;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .LandingPageTeam_box_subTitle {
+            margin-top: 0px;
+        }
+
+        .LandingPageTeam_loginButton {
+            transform: translate(-50%, 0%);
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .LandingPageLoginHolder {
+            width: 100%;
+            height: 100%;
+            display: none;
+            background: rgba(255, 255, 255, 0.8);
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            z-index: 1000000;
+        }
+
+        .LandingPageLogin {
+            width: 400px;
+            background: white;
+            padding-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgb(100, 100, 100);
+            margin-left: -200px;
+            margin-top: -250px;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+        }
+
+        .LandingPageLogin_title {
+            width: 100%;
+            font-weight: 500;
+            color: black;
+            text-align: center;
+            font-size: 20px;
+            padding: 10px 0px;
+            float: left;
+        }
+
+        .LandingPageLogin_close {
+            transition: 0.3s all;
+            cursor: pointer;
+            font-size: 18px;
+            position: absolute;
+            top: 5px;
+            right: 8px;
+        }
+
+        .LandingPageLogin_close:hover {
+            transform: scale(1.2);
+        }
+
+        .LandingPageLogin_button {
+            width: 85%;
+            transform: translate(-50%, 0%);
+            margin-top: 30px;
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .LandingPageLogin_buttonNoMargin {
+            margin-top: 0px;
+        }
+
+        .LandingPageLogin_googleLogin {
+            width: 100%;
+            height: 34px;
+            background: #DD4B39;
+            border-radius: 5px;
+            line-height: 34px;
+            cursor: pointer;
+            box-shadow: 0px 0px 15px rgb(150, 150, 150);
+            transition: 0.3s all;
+            float: left;
+        }
+
+        .LandingPageLogin_googleLogin:hover {
+            box-shadow: 0px 0px 20px 5px rgb(200, 200, 200);
+            transform: scale(1.02);
+        }
+
+        .LandingPageLogin_googleLogin_icon {
+            width: 50px;
+            color: white;
+            height: 100%;
+            font-size: 20px;
+            border-right: 1px #BB3F30 solid;
+            text-align: center;
+            float: left;
+        }
+
+        .LandingPageLogin_googleLogin_text {
+            color: white;
+            margin-left: 20px;
+            font-size: 16px;
+            float: left;
+        }
+
+        .LandingPageLogin_buttonOr {
+            width: 100%;
+            margin: 50px 0px;
+            position: relative;
+            float: left;
+        }
+
+        .LandingPageLogin_or {
+            width: 170px;
+            background: white;
+            text-align: center;
+            transform: translate(-50%, 0%);
+            color: black;
+            position: relative;
+            float: left;
+            left: 50%;
+            z-index: 2;
+        }
+
+        .LandingPageLogin_orBorder {
+            width: 100%;
+            height: 1px;
+            background: rgb(170, 170, 170);
+            transform: translate(0%, -50%);
+            position: absolute;
+            float: left;
+            top: 50%;
+        }
+
+        .LandingPageLogin_button_submit {
+            width: 140px;
+            margin-left: -70px;
+            padding: 5px 20px;
+            text-align: center;
+            border-radius: 10px;
+            color: white;
+            box-sizing: border-box;
+            box-shadow: 0px 0px 5px rgb(160, 12, 242);
+            background: linear-gradient(225deg, #dc4eee, rgb(160, 12, 242));
+            border-radius: 20px;
+            transition: 0.3s all;
+            cursor: pointer;
+            position: relative;
+            float: left;
+            left: 50%;
+        }
+
+        .LandingPageLogin_button_submit:hover {
+            box-shadow: 0px 0px 10px rgb(160, 12, 242);
+            transform: scale(1.05);
+        }
+
+        .LandingPageLogin_button_error {
+            width: 100%;
+            color: rgb(234, 66, 98);
+            display: none;
+            margin-top: 5px;
+            text-align: center;
+            font-size: 16px;
+            float: left;
+        }
+
+        .LandingPageLogin_button_input {
+            width: 100%;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            background-color: #f5f5f5;
+            text-align: left;
+            font-size: 15px;
+            border: 1px solid #bbb;
+            border-radius: 30px;
+            overflow: visible;
+            color: rgb(160, 12, 242);
+            transition: 0.3s all;
+            float: left;
+        }
+
+        .LandingPageLogin_button_input:focus {
+            outline: none;
+            border: 1px rgb(160, 12, 242) solid;
+            transform: scale(1.02);
+        }
+
+        @media screen and (max-width: 990px) {
+            .selected-companies .landingPage-very-small-hide {
+                display: none;
+            }
+
+            .selected-companies {
+                padding: 0px 0px;
+                margin-top: 20px;
+                position: relative;
+                top: 20px;
+            }
+
+            .selected-companies-border {
+                width: 90%;
+                display: block;
+                border-top: 1px rgb(210, 210, 210) solid;
+                position: relative;
+                float: left;
+                left: 5%;
+                top: 20px;
+            }
+
+            .index_progressHolder {
+                width: 90%;
+            }
+
+            .landingPagePage3_box_textMobile {
+                display: none;
+            }
+
+            .landingPagePage3_box_title {
+                width: 80%;
+                position: relative;
+                float: left;
+                left: 10%;
+            }
+
+            .landingPage_logo1 {
+                width: 160px;
+                top: 6px;
+                left: 6px;
+            }
+
+            .landingPagePage3_right {
+                height: auto;
+            }
+
+            .landingPage_companies_images {
+                margin-top: 20px;
+            }
+
+            .landingPage_spliter {
+                width: 90%;
+                opacity: 1;
+            }
+
+            .landingPagePage3_box {
+                padding-bottom: 60px;
+                transform: translate(0%, 0%);
+                top: 0px;
+            }
+
+            .landingPage_menuButton_line {
+                background: rgb(150, 150, 150);
+            }
+
+            .landingPage_menuButton {
+                z-index: 1000;
+                right: 15px;
+            }
+
+            .landingPage_menuButton span {
+                background: black;
+            }
+
+            .landingPage_menu {
+                z-index: 100;
+            }
+
+            .landingPage_Carousel_section_chart_mac {
+                width: 100%;
+                height: auto;
+                background: none;
+                float: left;
+                top: 200px;
+            }
+
+            .landingPage_Carousel_section_chart_mac {
+                height: auto;
+            }
+
+            .landingPage_Carousel_section_chart_img {
+                width: calc(100% - 30px);
+                height: auto;
+                /*background: url('/images/dashboard8.jpg');*/
+                background-size: 100% auto;
+                background-repeat: no-repeat;
+                box-shadow: 0px 0px 40px rgb(100, 100, 100);
+                border-radius: 3px;
+                position: relative;
+                float: left;
+                left: 15px;
+                top: 33px;
+                z-index: 1;
+            }
+
+            .landingPage_security a {
+                color: rgb(150, 150, 150);
+            }
+
+            .landingPage_jobs a {
+                color: rgb(150, 150, 150);
+            }
+
+            .landingPagePage3_video {
+                width: 80%;
+                height: 250px;
+            }
+
+            .landingPage_extention {
+                display: none;
+            }
+
+            .landingPage_left_title br {
+                display: none;
+            }
+
+            .landingPagePage3 {
+                margin-top: 60px;
+                padding-top: 60px;
+            }
+
+            .selected-companies {
+                width: 100%;
+            }
+
+            .selected-companies .landingPage_rowForMobile img {
+                height: 40px;
+            }
+
+            .landingPagePage3_boxs_box {
+                box-sizing: border-box;
+            }
+
+            .landingPage_left_arrrow {
+                display: none;
+            }
+
+            .LandingPageLoginHolder {
+                z-index: 1000000;
+            }
+
+            .LandingPageLogin {
+                width: 90%;
+                margin-left: 0px;
+                left: 5%;
+            }
+
+            .landingPagePage3_boxs_box {
+                width: 100%;
+                margin-top: 50px;
+                float: left;
+            }
+
+            .landingPagePage3_box_text {
+                width: 80%;
+                padding: 0px;
+                font-size: 16px;
+                line-height: 22px;
+                position: relative;
+                float: left;
+            }
+
+            .landingPage_Carousel {
+                width: 100%;
+                overflow: hidden;
+                box-sizing: border-box;
+                margin-top: 40px;
+                transform: translate(50%, 0%);
+                right: 50%;
+                top: 0px;
+                float: left;
+            }
+
+            .landingPage_Carousel_section_chart {
+                width: 100vw;
+            }
+
+            .landingPage_left,
+            .landingPage_right {
+                width: 100%;
+                height: auto;
+                box-sizing: border-box;
+                padding: 0px 20px 0px 20px;
+                overflow: initial;
+                position: relative;
+                float: left;
+            }
+
+            .landingPage_right {
+                margin-top: -20%;
+                padding: 0px;
+            }
+
+            .landingPage_left {
+                height: 370px;
+            }
+
+            .landingPage_rowForMobile {
+                width: 100%;
+                display: block;
+                margin-top: 10px;
+                float: left;
+            }
+
+            .landingPage_companies {
+                padding: 60px 0px;
+            }
+
+            .landingPage_companies_title {
+                width: 100%;
+                padding: 0px 20px;
+                box-sizing: border-box;
+                float: left;
+            }
+
+            .landingPage_companies_images_img {
+                transform: translate(-50%, 0%);
+                margin: 20px 0px 0px 0px;
+                position: relative;
+                float: left;
+                left: 50%;
+            }
+
+            .landingPage_powerInbox {
+                top: 0px;
+            }
+
+            .landingPage_left {
+                margin-top: 20px;
+                padding: 0px;
+            }
+
+            .landingPage_right {
+                /*transform: scale(0.8);*/
+                margin-top: 20px;
+                background: white;
+                margin-top: 0px;
+            }
+
+            .landingPage_Carousel_section_chart {
+                height: auto;
+                transform: translate(0%, 0%);
+                position: relative;
+                top: 0px;
+            }
+
+            .landingPage_Carousel_section_chart_mac {
+                top: 0;
+                left: 0;
+            }
+
+            .landingPage_left_main {
+                width: 100%;
+                box-sizing: border-box;
+                transform: translate(0%, 0%);
+                padding: 0px 20px;
+                margin-top: 40px;
+                top: inherit;
+                left: 0px;
+            }
+
+            .landingPage_left_title,
+            .landingPage_left_subTitle {
+                width: 100%;
+                text-align: center;
+            }
+
+            .landingPage_left_title {
+                font-size: 30px;
+                margin-top: 40px;
+            }
+
+            .landingPage_left_subTitle {
+                font-size: 20px;
+            }
+
+            .landingPage_login {
+                color: rgb(150, 150, 150);
+                font-size: 17px;
+                position: absolute;
+                border: none;
+                top: 10px;
+                right: 45px;
+            }
+
+            .landingPage_logo,
+            .landingPage_logo1 {
+                position: absolute;
+            }
+
+            .landingPage_loginButton {
+                margin-top: 20px;
+                max-width: 2000px;
+            }
+
+            .landingPage_loginButton_input,
+            .landingPage_loginButton_button {
+                width: 100%;
+                box-sizing: border-box;
+                float: left;
+            }
+
+            .landingPage_loginButton_button {
+                margin-left: 0px;
+            }
+
+            .LandingPageContact_right {
+                width: 100%;
+                height: auto;
+                padding: 0px 20px;
+                box-sizing: border-box;
+                transform: translate(0%, 0%);
+                margin-left: 0px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+                position: relative;
+                float: left;
+                left: 0px;
+                top: 0px;
+            }
+
+            .LandingPageContact_right_map {
+                display: none;
+            }
+
+            .LandingPageContact_center {
+                box-sizing: border-box;
+                width: calc(100% - 40px);
+                margin-left: 0px;
+            }
+
+            .LandingPageContact_right_rowForMobile {
+                width: 230px;
+                box-sizing: border-box;
+                position: relative;
+                float: left;
+            }
+
+            .LandingPageContact_left_box {
+                width: 100%;
+                box-sizing: border-box;
+                transform: translate(0%, 0%);
+                left: 0px;
+            }
+
+            .LandingPageTeam_box {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .LandingPageTeam_box_imgBigger {
+                /*width: 230px;*/
+                /*height: 200px;*/
+                /*box-sizing: border-box;*/
+                /*left: 0px;*/
+                /*top: -30px;*/
+            }
+
+            .LandingPageTeam_loginButton {
+                width: 100%;
+                padding: 0px 20px;
+                box-sizing: border-box;
+                float: left;
+            }
+
+            .LandingPageLogin_button_input {}
+        }
+
+        @media screen and (max-width: 667px) {
+            footer {
+                padding-bottom: 70px;
+            }
+        }
+
+        @media screen and (max-width: 630px) {
+            .selected-companies .landingPage_rowForMobile img {
+                height: 30px;
+            }
+        }
+
+        @media screen and (max-width: 475px) {
+            .selected-companies .landingPage_rowForMobile img {
+                height: 25px;
+            }
+        }
+    </style>
+    <script src="/doc/superQueryTopScripts.doc.Ke4bsV22L.js"></script>
+
+<link href="/vendors.12e94ebcb59848882519.css?12e94ebcb59848882519" rel="stylesheet"><link href="/main.12e94ebcb59848882519.css?12e94ebcb59848882519" rel="stylesheet"></head>
+
+<body>
+
+<img height="1" width="1" style="display:none;" alt="" src="https://px.ads.linkedin.com/collect/?pid=486316&conversionId=1196753&fmt=gif" />
+
+    <div class="whiteTheme animated fadeIn">
+        <div id="app"></div>
+    </div>
+
+<canvas id="cvl" width="12" height="16" style="display: none"></canvas>
+<img alt="hidden favicon for canvas" style="display:none" id="hourglass-start" src="data:image/svg+xml;base64,PHN2ZyBhcmlhLWhpZGRlbj0idHJ1ZSIgZm9jdXNhYmxlPSJmYWxzZSIgZGF0YS1wcmVmaXg9ImZhcyIgZGF0YS1pY29uPSJob3VyZ2xhc3Mtc3RhcnQiIGNsYXNzPSJzdmctaW5saW5lLS1mYSBmYS1ob3VyZ2xhc3Mtc3RhcnQgZmEtdy0xMiIgcm9sZT0iaW1nIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQgNTEyIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0zNjAgMEgyNEMxMC43NDUgMCAwIDEwLjc0NSAwIDI0djE2YzAgMTMuMjU1IDEwLjc0NSAyNCAyNCAyNCAwIDkwLjk2NSA1MS4wMTYgMTY3LjczNCAxMjAuODQyIDE5MkM3NS4wMTYgMjgwLjI2NiAyNCAzNTcuMDM1IDI0IDQ0OGMtMTMuMjU1IDAtMjQgMTAuNzQ1LTI0IDI0djE2YzAgMTMuMjU1IDEwLjc0NSAyNCAyNCAyNGgzMzZjMTMuMjU1IDAgMjQtMTAuNzQ1IDI0LTI0di0xNmMwLTEzLjI1NS0xMC43NDUtMjQtMjQtMjQgMC05MC45NjUtNTEuMDE2LTE2Ny43MzQtMTIwLjg0Mi0xOTJDMzA4Ljk4NCAyMzEuNzM0IDM2MCAxNTQuOTY1IDM2MCA2NGMxMy4yNTUgMCAyNC0xMC43NDUgMjQtMjRWMjRjMC0xMy4yNTUtMTAuNzQ1LTI0LTI0LTI0em0tNjQgNDQ4SDg4YzAtNzcuNDU4IDQ2LjIwNC0xNDQgMTA0LTE0NCA1Ny43ODYgMCAxMDQgNjYuNTE3IDEwNCAxNDR6Ij48L3BhdGg+PC9zdmc+">
+<img alt="hidden favicon for canvas" style="display:none" id="hourglass-end" src="data:image/svg+xml;base64,PHN2ZyBhcmlhLWhpZGRlbj0idHJ1ZSIgZm9jdXNhYmxlPSJmYWxzZSIgZGF0YS1wcmVmaXg9ImZhcyIgZGF0YS1pY29uPSJob3VyZ2xhc3MtZW5kIiBjbGFzcz0ic3ZnLWlubGluZS0tZmEgZmEtaG91cmdsYXNzLWVuZCBmYS13LTEyIiByb2xlPSJpbWciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDM4NCA1MTIiPjxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTM2MCA2NGMxMy4yNTUgMCAyNC0xMC43NDUgMjQtMjRWMjRjMC0xMy4yNTUtMTAuNzQ1LTI0LTI0LTI0SDI0QzEwLjc0NSAwIDAgMTAuNzQ1IDAgMjR2MTZjMCAxMy4yNTUgMTAuNzQ1IDI0IDI0IDI0IDAgOTAuOTY1IDUxLjAxNiAxNjcuNzM0IDEyMC44NDIgMTkyQzc1LjAxNiAyODAuMjY2IDI0IDM1Ny4wMzUgMjQgNDQ4Yy0xMy4yNTUgMC0yNCAxMC43NDUtMjQgMjR2MTZjMCAxMy4yNTUgMTAuNzQ1IDI0IDI0IDI0aDMzNmMxMy4yNTUgMCAyNC0xMC43NDUgMjQtMjR2LTE2YzAtMTMuMjU1LTEwLjc0NS0yNC0yNC0yNCAwLTkwLjk2NS01MS4wMTYtMTY3LjczNC0xMjAuODQyLTE5MkMzMDguOTg0IDIzMS43MzQgMzYwIDE1NC45NjUgMzYwIDY0ek0xOTIgMjA4Yy01Ny43ODcgMC0xMDQtNjYuNTE4LTEwNC0xNDRoMjA4YzAgNzcuOTQ1LTQ2LjUxIDE0NC0xMDQgMTQ0eiI+PC9wYXRoPjwvc3ZnPg==">
+
+    <div id="index_progress" style="display:block">
+        <div class="index_progressHolder">
+            <div class="index_progress_logo"><img src="/images/logoNew.png" alt="" /></div>
+            <div id="index_progress_border"></div>
+            <div id="index_progress_text">100%</div>
+            <div class="index_progress_title"></div>
+        </div>
+    </div>
+
+    <div id="index_body" style="display:none">
+        <script src="/doc/jqueryLib.Ke4bsV22L.js"></script>
+        <!-- <script src="https://code.jquery.com/jquery-2.2.4.min.js"
+            integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script> -->
+
+        <noscript>
+            <img height="1" width="1" src="https://www.facebook.com/tr?id=416296055481040&ev=PageView
+    &noscript=1" />
+        </noscript>
+        <!-- End Facebook Pixel Code -->
+
+        <div id="index_extentionPage">
+            <img src="/images/rectangle-6.png" class="index_extentionPage_img">
+            <div class="index_extentionPage_boxHolder">
+
+                <div class="index_extentionPage_box">
+                    <img src="/images/sqSymbol.png" class="index_extentionPage-imgLeft">
+                    <div class="index_extentionPage_box_content">
+                        <div class="index_extentionPage_box_title">Login</div>
+                        <p class="index_extentionPage_box_text">You're one step away from becoming a data superhero!</p>
+                        <p class="index_extentionPage_box_text">We just need to authenticate your google account and
+                            you're
+                            ready
+                            to go!</p>
+
+                        <div class="index_extentionPage_box_button">
+                            <div class="index_extentionPage_box_button-icon">
+                                <img class="google-icon" src="/images/google-g-logo.png">
+                            </div>
+                            <div class="index_extentionPage_box_button-text">Sign in with Google</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="index_payment-made">
+            <img src="/images/rectangle-6.png" class="index_payment-made_img">
+            <div class="index_payment-made_boxHolder">
+
+                <div class="index_payment-made_box">
+                    <!-- svg -->
+                    <img src="images/group-46.svg" class="index_payment-image">
+                    <div class="index_payment-made_box_content">
+                        <div class="index_payment-logo">
+                            <img src="/images/logoNew.png">
+                        </div>
+                        <div class="index_payment-made_box_title">Registration successful</div>
+                        <div class="index_payment-made_box_button">
+                            <div class="index_payment-made_box_button-text">Close</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="index_localstorage">
+            <img src="/images/rectangle-6.png" class="index_localstorage_img">
+            <div class="index_payment-made_boxHolder">
+                <div class="index_localstorage_box">
+                    <img src="/images/sqSymbol.png" class="index_localstorage_bg_img">
+                    <div class="index_localstorage_box_content">
+                        <div class="index_localstorage_box_title">Local Storage</div>
+                        <p class="index_localstorage_box_text">You're one step away from becoming a data superhero!</p>
+                        <p class="index_localstorage_box_text">We just need to authenticate your google account and
+                            you're ready
+                            to go!</p>
+                        <div class="index_localstorage_box_button">
+                            <div class="index_localstorage_box_button-text">Open in new page</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="landingPage" id="index_landingPage1" style="display:none">
+            <div class="landingPage_notHaveProjects">
+                <div class="landingPage_notHaveProjects_box">
+                    <div class="landingPage_notHaveProjects_box_text"></div>
+                    <div class="landingPage_notHaveProjects_box_button">Ok</div>
+                </div>
+            </div>
+
+            <div class="landingPage_privacy">
+                <div class="landingPage_privacy_holder">
+                    <div class="landingPage_privacy_title">Your data is private</div>
+                    <div class="landingPage_privacy_text">
+                        It will never be used in any way except to display it for your eyes only and will remain so
+                        forever.
+                        <span style="display:none">
+                            <br />
+                            <br /> In the next screen we will request your permission to connect to your BigQuery
+                            account, please
+                            allow it.
+                            <br />
+                            <br /> You’re welcome to view our Privacy Policy & Terms of Use contact us at
+                            support@evaluex.io at
+                            anytime
+                        </span>
+                    </div>
+                    <div class="landingPage_privacy_lock">
+                        <i class="ion-ios-locked"></i>
+                    </div>
+                    <div class="landingPage_privacy_button">Got it</div>
+                </div>
+            </div>
+
+            <div class="landingPageFirst">
+                <span class="landingPage_notBlur">
+
+                    <div class="landingPage_menuButton">
+                        <span class="landingPage_menuButton_line landingPage_menuButton_line1"></span>
+                        <span class="landingPage_menuButton_line landingPage_menuButton_line2"></span>
+                        <span class="landingPage_menuButton_line landingPage_menuButton_line3"></span>
+                    </div>
+
+                    <div class="landingPage_menu">
+                        <div class="landingPage_menu_itemHolder">
+                            <div class="landingPage_menu_item">
+                                <a href="/doc/security.doc.html">Security & privacy</a>
+                            </div>
+                            <div class="landingPage_menu_item" style="display:none">The Team</div>
+                            <div class="landingPage_menu_item">
+                                <a href="/doc/gdpr.doc.html">GDPR compliance</a>
+                            </div>
+                            <div class="landingPage_menu_item">
+                                <a href="/doc/jobs.doc.html">Careers</a>
+                            </div>
+                            <div class="landingPage_menu_item" style="display:none">About</div>
+                        </div>
+                    </div>
+
+                    <div class="landingPage_login">Login</div>
+                    <div class="landingPage_header">
+                        <div class="landingPage_logo">EVALUE
+                            <span class="landingPage_logoX">X</span>
+                        </div>
+                        <div class="landingPage_logo1">
+                            <img src="/images/logoNew.png" alt="" />
+                        </div>
+                    </div>
+
+
+                    <div class="landingPage_left">
+                        <div class="landingPage_left_main">
+                            <div class="landingPage_left_title">The future of serverless BigData</div>
+                            <div class="landingPage_left_subTitle">Google BigQuery optimization engine</div>
+
+                            <div class="landingPage_loginButton">
+                                <div class="landingPage_globalRow">
+                                    <div class="landingPage_loginButton_button" id="landingPage_loginButton_button1">
+                                        <img src="/images/chrome1.png" alt=""
+                                            class="landingPage_loginButton_button_img">
+                                        <span class="landingPage_computer">Add to chrome</span>
+                                        <span class="landingPage_mobile">Add to BigQuery</span>
+                                    </div>
+                                </div>
+                                <div class="landingPage_loginButton_error">Email not valid</div>
+                            </div>
+                            <div class="landingPage_loginButton landingPage_loginButtonGoToDashboard">
+                                <div class="landingPage_loginButton_button landingPage_loginButton_buttonGoToDashboard">
+                                    Go to Dashboard
+                                </div>
+                            </div>
+                            <a class="landingPage_extention" stlye="display:none"
+                                href="https://chrome.google.com/webstore/detail/superquery-google-bigquer/lfckfngaeoheoppemkocjjebloiamfdc?utm_source=chrome-ntp-icon"
+                                target="_blank">
+                                <img src="/images/chrome.jpg" class="ion-social-chrome" /> Or download our chrome
+                                extension
+                            </a>
+                        </div>
+                        <div class="landingPage_left_arrrow">
+                            <i class="ion-ios-arrow-down"></i>
+                        </div>
+                    </div>
+
+
+                    <div class="landingPage_right">
+                        <div class="landingPage_right_backgroundWhite"></div>
+                        <div class="landingPage_Carousel_section_chart">
+                            <div class="landingPage_Carousel_section_chart_mac">
+                                <img class="landingPage_Carousel_section_chart_img" src="/images/dashboard8.jpg" />
+                            </div>
+                        </div>
+                        <div class="landingPage_Carousel">
+                            <div class="landingPage_Carousel_section">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="selected-companies-border"></div>
+                    <div class="selected-companies">
+                        <div class="landingPage_rowForMobile">
+                            <img src="/images/fiverr.png" class="landingPage_companies_images_img" />
+                        </div>
+                        <div class="landingPage_rowForMobile">
+                            <img src="/images/goDaddy.png" class="landingPage_companies_images_img" />
+                        </div>
+                        <div class="landingPage_rowForMobile">
+                            <img src="/images/kik.png" class="landingPage_companies_images_img" />
+                        </div>
+                        <div class="landingPage_rowForMobile landingPage-very-small-hide">
+                            <img src="/images/ironLogo.png" class="landingPage_companies_images_img" />
+                        </div>
+                        <div class="landingPage_rowForMobile landingPage-small-hide">
+                            <img src="/images/dome9Logo.jpg" class="landingPage_companies_images_img" />
+                        </div>
+                        <div class="landingPage_rowForMobile landingPage-medium-hide">
+                            <img src="/images/swiss.png" class="landingPage_companies_images_img" />
+                        </div>
+                        <div class="landingPage_rowForMobile landingPage-medium-hide landingPage-large-hide">
+                            <img src="/images/spotim.png" class="landingPage_companies_images_img" />
+                        </div>
+                        <div
+                            class="landingPage_rowForMobile landingPage-medium-hide landingPage-large-hide landingPage-xl-hide">
+                            <img src="/images/ilyonLogo.png" class="landingPage_companies_images_img" />
+                        </div>
+                    </div>
+
+
+                    <div class="landingPage_companies">
+                        <div class="landingPage_companies_number">
+                            <div class="landingPage_companies_numberHolder">
+                                <span class="landingPage_companies_numberText">Optimised queries:</span>
+                                <span class="landingPage_companies_number_num">67,152,127</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Team-->
+                    <div class="LandingPageTeam" style="display:none">
+                        <div class="landingPage_spliter"></div>
+                        <div class="LandingPageTeam_title">EVALUE
+                            <span class="landingPage_globalText">X</span> Team</div>
+                        <div class="LandingPageTeam_boxHolder">
+
+                            <div class="LandingPageTeam_box">
+                                <div class="LandingPageTeam_box_imgHolder">
+                                    <img src='/images/avi.jpg' class="LandingPageTeam_box_img" />
+                                </div>
+                                <div class="LandingPageTeam_box_title landingPage_globalText">Avi Zloof</div>
+                                <div class="LandingPageTeam_box_subTitle">Founder & CEO</div>
+                                <a href="https://www.linkedin.com/in/avi-zloof-6931213/" target="_blank"
+                                    class="LandingPageTeam_box_subItem">Linkedin</a>
+                            </div>
+
+                            <div class="LandingPageTeam_box">
+                                <div class="LandingPageTeam_box_imgHolder">
+                                    <img src='/images/ido.jpg' class="LandingPageTeam_box_img" />
+                                </div>
+                                <div class="LandingPageTeam_box_title landingPage_globalText">Ido Volff</div>
+                                <div class="LandingPageTeam_box_subTitle">Co-Founder &
+                                    <br />VP Business Development </div>
+                                <a href="https://www.linkedin.com/in/ido-volff-aa221a20/" target="_blank"
+                                    class="LandingPageTeam_box_subItem">Linkedin</a>
+                            </div>
+
+                            <div class="LandingPageTeam_box">
+                                <div class="LandingPageTeam_box_imgHolder">
+                                    <img src='/images/mor15.jpg'
+                                        class="LandingPageTeam_box_img LandingPageTeam_box_imgBigger" />
+                                </div>
+                                <div class="LandingPageTeam_box_title landingPage_globalText">Mor Zloof</div>
+                                <div class="LandingPageTeam_box_subTitle">Co-Founder &
+                                    <br /> VP Product</div>
+                                <a href="https://www.linkedin.com/in/mor-zloof-49869362/" target="_blank"
+                                    class="LandingPageTeam_box_subItem">Linkedin</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="landingPage_globalRow">
+                        <div class="LandingPageTeam_loginButton LandingPageTeam_loginButtonLast">
+                            <div class="landingPage_loginButton">
+                                <div class="landingPage_globalRow">
+                                    <div class="landingPage_loginButton_button" id="landingPage_loginButton_button2">
+                                        <img src="/images/chrome1.png" alt=""
+                                            class="landingPage_loginButton_button_img">
+                                        <span class="landingPage_computer">Add to chrome</span>
+                                        <span class="landingPage_mobile">Add to BigQuery</span>
+                                    </div>
+                                </div>
+                                <div class="landingPage_loginButton_error">Email not valid</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Team-->
+                </span>
+
+                <!--login-->
+                <div class="LandingPageLoginHolder">
+                    <div class="LandingPageLogin">
+                        <div class="LandingPageLogin_title">Login</div>
+                        <div class="LandingPageLogin_close">
+                            <i class="ion-close-round"></i>
+                        </div>
+
+                        <div class="LandingPageLogin_button">
+                            <div class="LandingPageLogin_googleLogin">
+                                <div class="LandingPageLogin_googleLogin_icon">
+                                    <i class="ion-social-google" aria-hidden="true"></i>
+                                </div>
+                                <div class="LandingPageLogin_googleLogin_text">Login With Google</div>
+                            </div>
+                        </div>
+
+                        <div class="LandingPageLogin_buttonOr">
+                            <div class="LandingPageLogin_or">EVALUEX account</div>
+                            <div class="LandingPageLogin_orBorder"></div>
+                        </div>
+
+                        <div class="LandingPageLogin_button LandingPageLogin_buttonNoMargin">
+                            <input type="email" placeholder="Email"
+                                class="LandingPageLogin_button_input LandingPageLogin_button_inputEmail">
+                        </div>
+
+                        <div class="LandingPageLogin_button">
+                            <!-- <input type="password" placeholder="Password" autocomplete="off"
+                                class="LandingPageLogin_button_input LandingPageLogin_button_inputPassword"> -->
+                        </div>
+                        <div class="LandingPageLogin_button">
+                            <div class="global_row">
+                                <div class="LandingPageLogin_button_submit">
+                                    Login
+                                </div>
+                            </div>
+                            <div class="LandingPageLogin_button_error">error</div>
+                        </div>
+                    </div>
+                </div>
+                <!--login-->
+
+                <footer>
+                    Made with
+                    <i class="ion-ios-heart"></i> by superQuery
+                    <br /> View our
+                    <a href="/doc/EVALUEX_Privacy_Policy_2017.doc.html">privacy policy</a> and
+                    <a href="/doc/Evaluex_Terms_Of_Use_2017.doc.html">terms of use</a>
+                    <br /> contact us at
+                    <a href="mailTo:support@evaluex.io">support@superquery.io</a>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <iframe id="download_iframe" style="display:none;"></iframe>
+
+    <img height="1" width="1" style="display:none;" alt=""
+        src="https://dc.ads.linkedin.com/collect/?pid=486316&conversionId=920481&fmt=gif" />
+
+    <script src="/doc/superQueryBottomScripts.doc.Ke4bsV22L.js"></script>
+
+<script type="text/javascript" src="/bundle.12e94ebcb59848882519.js?12e94ebcb59848882519"></script><script type="text/javascript" src="/2.bundle.12e94ebcb59848882519.js?12e94ebcb59848882519"></script><script type="text/javascript" src="/0.bundle.12e94ebcb59848882519.js?12e94ebcb59848882519"></script></body>
+
+</html>

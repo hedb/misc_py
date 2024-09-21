@@ -1,0 +1,5 @@
+instructor
+pydantic
+openai
+requests
+beautifulsoup4

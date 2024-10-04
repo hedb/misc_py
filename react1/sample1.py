@@ -1,4 +1,7 @@
 import os
+os.environ["LANGSMITH_TRACING"] = "true"
+os.environ['LANGSMITH_API_KEY'] = os.environ['PERSONAL_LANGSMITH_API_KEY']
+
 from typing import Annotated, Literal, TypedDict
 
 from langchain_core.messages import HumanMessage
@@ -9,7 +12,6 @@ from langgraph.graph import END, START, StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode
 
 
-os.environ["LANGSMITH_TRACING"] = "true"
 
 
 # Define the tools for the agent to use

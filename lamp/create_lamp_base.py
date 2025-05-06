@@ -165,7 +165,6 @@ def _create_anchor_points(parent_node, base_radius, base_height):
          return None
     return anchors_sop
 
-
 def _setup_pinning_attributes(parent_node, input_rod_geo, input_anchor_geo):
     """Sets up groups and attributes needed for Vellum pin constraints using the standard 'group' SOP."""
     print("  Adding pinning attributes...")
@@ -180,32 +179,17 @@ def _setup_pinning_attributes(parent_node, input_rod_geo, input_anchor_geo):
     print(f"  Successfully created group node: {rod_endpoints_group.path()} of type {rod_endpoints_group.type().name()}")
     rod_endpoints_group.setInput(0, input_rod_geo)
 
-    # --- DEBUG: List parameters (can be commented out later) ---
-    # print(f"  Parameters available on '{rod_endpoints_group.path()}':")
-    # try:
-    #     param_names = [p.name() for p in rod_endpoints_group.parms()]
-    #     param_names.sort()
-    #     print(f"    {param_names}")
-    # except Exception as e:
-    #     print(f"    ERROR listing parameters: {e}", file=sys.stderr)
-    # --- END DEBUG ---
-
     try:
         print("  Configuring 'group' SOP to select first and last points...")
-
-        # 1. Set the name of the group to be created
         rod_endpoints_group.parm("crname").set("pin_targets")
         print(f"    Set 'crname' (created group name) to: 'pin_targets'")
 
-        # 2. Set entity to Points
-        # The 'entity' parameter on the 'group' SOP often takes string tokens like "points", "prims", etc.
         entity_parm = rod_endpoints_group.parm("entity")
         if entity_parm:
             try:
-                entity_parm.set("points") # Try the string token
+                entity_parm.set("points")
                 print(f"    Set 'entity' to: 'points'")
             except hou.OperationFailed:
-                # If token fails, try to find index from menu (though 'points' token is common)
                 print(f"    Failed to set 'entity' to 'points' token. Listing menu items for 'entity':")
                 try:
                     labels = entity_parm.menuLabels()
@@ -215,29 +199,29 @@ def _setup_pinning_attributes(parent_node, input_rod_geo, input_anchor_geo):
                     print(f"      Set 'entity' to index {points_idx} (Points).")
                 except (ValueError, hou.Error) as e_menu:
                     print(f"      ERROR finding/setting 'entity' to Points via menu: {e_menu}. Grouping might fail.", file=sys.stderr)
-                    return None, None # Critical if we can't set to points
+                    return None, None
         else:
             print("    ERROR: 'entity' parameter not found.", file=sys.stderr)
             return None, None
 
-
-        # 3. Enable "Keep by Number" section
-        # The 'groupnumber' parameter has multiple "pages" or modes selected by an integer.
-        # Mode 0 is "Disable", Mode 1 is "Enable Pattern", Mode 2 "Enable Start/End"
-        # We want "Enable Pattern" which is usually index 1 for this switcher.
         groupnumber_switcher_parm = rod_endpoints_group.parm("groupnumber")
         if groupnumber_switcher_parm:
-            groupnumber_switcher_parm.set(1) # Set to mode "Enable Pattern" (or "By Pattern")
+            groupnumber_switcher_parm.set(1)
             print(f"    Set 'groupnumber' switcher to mode 1 (Enable Pattern).")
         else:
             print("    ERROR: 'groupnumber' (switcher) parameter not found.", file=sys.stderr)
             return None, None
 
-
-        # 4. Set the pattern to select points 0 and N-1
         pattern_parm = rod_endpoints_group.parm("pattern")
         if pattern_parm:
-            num_points = input_rod_geo.geometry().numPoints()
+            # Get geometry from the input node to the group SOP
+            geo_to_group = input_rod_geo.geometry() # This is a hou.Geometry object
+            if geo_to_group is None:
+                print("  ERROR: Could not retrieve geometry from input_rod_geo.", file=sys.stderr)
+                return None, None
+
+            num_points = len(geo_to_group.points())
+
             if num_points < 2:
                 print("  ERROR: Input rod geometry has less than 2 points for grouping.", file=sys.stderr)
                 return None, None
@@ -250,10 +234,9 @@ def _setup_pinning_attributes(parent_node, input_rod_geo, input_anchor_geo):
 
     except hou.Error as e:
         print(f"  ERROR setting parameters for 'group' SOP: {e}", file=sys.stderr)
-        print("  Check the parameter list and ensure the parameter names and values are correct for selecting first/last points.")
         return None, None
 
-    # Add pin_idx attribute to anchors (this part should be fine)
+    # Add pin_idx attribute to anchors
     anchor_attr_sop = parent_node.createNode("attribwrangle", "anchor_pin_attr")
     if anchor_attr_sop is None:
         print("  ERROR: Failed to create 'attribwrangle' SOP for anchors.", file=sys.stderr)
@@ -264,47 +247,134 @@ def _setup_pinning_attributes(parent_node, input_rod_geo, input_anchor_geo):
 
     return rod_endpoints_group, anchor_attr_sop
 
+def _print_constraint_type_menu(node, constraint_desc):
+    """Helper to print the available menu items for 'constrainttype' parameter."""
+    ctype_parm = node.parm("constrainttype")
+    if ctype_parm:
+        print(f"      --- Menu for 'constrainttype' on {node.path()} ({constraint_desc}) ---")
+        try:
+            labels = ctype_parm.menuLabels()
+            print(f"        Labels: {labels}")
+            for i, label in enumerate(labels):
+                # Attempt to get token, but don't fail if it's not there
+                token_str = "(Token N/A)"
+                try:
+                    token = ctype_parm.menuTokens()[i]
+                    token_str = f"Token='{token}'"
+                except (AttributeError, IndexError):
+                    pass # Keep token_str as "(Token N/A)"
+                print(f"        Index {i}: Label='{label}', {token_str}")
+        except Exception as e_menu:
+            print(f"        ERROR listing 'constrainttype' menu labels: {e_menu}")
+        print(f"      --- End Menu for {constraint_desc} ---")
+    else:
+        print(f"      ERROR: 'constrainttype' parameter not found on {node.path()}", file=sys.stderr)
+
+def _list_node_parameters(node, description="Node"):
+    """Helper to print all parameters of a node."""
+    print(f"      --- Parameters for {description} ({node.path()}) ---")
+    try:
+        parm_names = [p.name() for p in node.parms()]
+        parm_names.sort()
+        print(f"        {parm_names}")
+    except Exception as e:
+        print(f"        ERROR listing parameters: {e}")
+    print(f"      --- End Parameters for {description} ---")
 
 def _setup_vellum_constraints(parent_node, input_geo_with_group, target_anchor_geo, rod_rigidness, base_radius):
     """Creates Vellum bend, stretch, and pin constraints."""
     print("  Setting up Vellum constraints...")
-    last_constraint_node = input_geo_with_group
+    last_constraint_node_output = input_geo_with_group
 
-    # Bend Constraints
-    vellum_bend_cons = parent_node.createNode("vellumconstraints", "rod_bend")
-    if vellum_bend_cons is None: return None
-    vellum_bend_cons.setInput(0, last_constraint_node)
-    vellum_bend_cons.parm("constrainttype").set("bend")
-    vellum_bend_cons.parm("group").set("pin_targets") # Apply to the rod points group
-    vellum_bend_cons.parm("restlengthscale").set(1.0)
-    vellum_bend_cons.parm("stiffness").set(rod_rigidness)
-    vellum_bend_cons.parm("stiffnessexp").set(0)
-    vellum_bend_cons.parm("thickness").set(base_radius * 0.03)
-    last_constraint_node = vellum_bend_cons
+    # --- Bend Constraints ---
+    print("    Creating Vellum Bend constraints...")
+    vellum_bend_cons_node = parent_node.createNode("vellumconstraints", "rod_bend")
+    if vellum_bend_cons_node is None: 
+        print("    ERROR: Failed to create Vellum Bend constraint node.", file=sys.stderr)
+        return None
+    vellum_bend_cons_node.setInput(0, last_constraint_node_output)
+    try:
+        vellum_bend_cons_node.parm("constrainttype").set("bend")
+        vellum_bend_cons_node.parm("group").set("pin_targets")
+        if vellum_bend_cons_node.parm("bendstiffness"):
+            vellum_bend_cons_node.parm("bendstiffness").set(rod_rigidness)
+        if vellum_bend_cons_node.parm("bendstiffnessexp"):
+             vellum_bend_cons_node.parm("bendstiffnessexp").set(0)
+        if vellum_bend_cons_node.parm("thickness"):
+             vellum_bend_cons_node.parm("thickness").set(base_radius * 0.03)
+    except hou.Error as e:
+        print(f"    ERROR setting Vellum Bend constraint parameters: {e}", file=sys.stderr)
+        return None
+    last_constraint_node_output = vellum_bend_cons_node
 
-    # Stretch Constraints
-    vellum_stretch_cons = parent_node.createNode("vellumconstraints", "rod_stretch")
-    if vellum_stretch_cons is None: return None
-    vellum_stretch_cons.setInput(0, last_constraint_node)
-    vellum_stretch_cons.parm("constrainttype").set("distance")
-    vellum_stretch_cons.parm("grouptype").set("edges")
-    vellum_stretch_cons.parm("stiffness").set(10000)
-    vellum_stretch_cons.parm("stiffnessexp").set(0)
-    last_constraint_node = vellum_stretch_cons
+    # --- Stretch Constraints ---
+    print("    Creating Vellum Stretch constraints...")
+    vellum_stretch_cons_node = parent_node.createNode("vellumconstraints", "rod_stretch")
+    if vellum_stretch_cons_node is None: 
+        print("    ERROR: Failed to create Vellum Stretch constraint node.", file=sys.stderr)
+        return None
+    vellum_stretch_cons_node.setInput(0, last_constraint_node_output)
+    try:
+        vellum_stretch_cons_node.parm("constrainttype").set("distance")
+        vellum_stretch_cons_node.parm("grouptype").set("edges")
+        if vellum_stretch_cons_node.parm("stretchstiffness"):
+            vellum_stretch_cons_node.parm("stretchstiffness").set(10000)
+        if vellum_stretch_cons_node.parm("stretchstiffnessexp"):
+             vellum_stretch_cons_node.parm("stretchstiffnessexp").set(0)
+    except hou.Error as e:
+        print(f"    ERROR setting Vellum Stretch constraint parameters: {e}", file=sys.stderr)
+        return None
+    last_constraint_node_output = vellum_stretch_cons_node
 
-    # Pin Constraints
-    vellum_pin_cons = parent_node.createNode("vellumconstraints", "rod_pin")
-    if vellum_pin_cons is None: return None
-    vellum_pin_cons.setInput(0, last_constraint_node)
-    vellum_pin_cons.parm("constrainttype").set("pintoanimation")
-    vellum_pin_cons.parm("group").set("pin_targets") # Group of points on rod to pin
-    vellum_pin_cons.parm("targetgeo").set(target_anchor_geo.path()) # Anchor geometry
-    vellum_pin_cons.parm("pintype").set(0)
-    vellum_pin_cons.parm("matchattrib").set("pin_idx") # Match using attribute
-    vellum_pin_cons.parm("restlength").set(0)
-    last_constraint_node = vellum_pin_cons
+    # --- Pin Constraints ---
+    print("    Creating Vellum Pin constraints...")
+    vellum_pin_cons_node = parent_node.createNode("vellumconstraints", "rod_pin")
+    if vellum_pin_cons_node is None: return None
+    vellum_pin_cons_node.setInput(0, last_constraint_node_output)
 
-    return last_constraint_node # Return the final constraint node
+    try:
+        # Set constraint type
+        vellum_pin_cons_node.parm("constrainttype").set("pin")
+        
+        # Set target group
+        vellum_pin_cons_node.parm("group").set("pin_targets")
+        
+        # Set target path
+        targetpath_parm = vellum_pin_cons_node.parm("targetpath")
+        if targetpath_parm:
+            targetpath_parm.set(target_anchor_geo.path())
+        else:
+            print("      ERROR: 'targetpath' parameter not found for Pin constraint.", file=sys.stderr)
+            return None
+
+        # Set pin type
+        pintype_parm = vellum_pin_cons_node.parm("pintype")
+        if pintype_parm:
+            pintype_parm.set(0)  # Permanent
+        else:
+            print("      ERROR: 'pintype' parameter not found.", file=sys.stderr)
+            return None
+
+        # Enable matching animation
+        matchanim_parm = vellum_pin_cons_node.parm("matchanimation")
+        if matchanim_parm:
+            matchanim_parm.set(1)  # Enable
+        
+        # Set rest length if parameter exists
+        restlength_parm = vellum_pin_cons_node.parm("restlength")
+        if restlength_parm:
+            restlength_parm.set(0)
+
+    except hou.Error as e:
+        print(f"    ERROR setting Vellum Pin constraint parameters: {e}", file=sys.stderr)
+        return None
+    except Exception as e_unexp:
+        print(f"    UNEXPECTED ERROR setting Vellum Pin constraints: {e_unexp}", file=sys.stderr)
+        return None
+
+    return vellum_pin_cons_node
+
+
 
 def _setup_vellum_solver(parent_node, geo_input, cons_input, coll_input, sim_params):
     """Creates and configures the Vellum solver."""
@@ -319,32 +389,104 @@ def _setup_vellum_solver(parent_node, geo_input, cons_input, coll_input, sim_par
     try:
         substeps = sim_params.get("substeps", 10)
         constraint_iterations = sim_params.get("constraint_iterations", 100)
-        solver_sop.parm("substeps").set(substeps)
-        solver_sop.parm("constraintiterations").set(constraint_iterations)
-        solver_sop.parm("force_startframe").set(True)
-        solver_sop.parm("startframe").set(1)
+        
+        # Check if parameters exist before setting them
+        substeps_parm = solver_sop.parm("substeps")
+        if substeps_parm:
+            substeps_parm.set(substeps)
+        
+        # Try different parameters for constraint iterations
+        iterations_parm = solver_sop.parm("constraintiterations")
+        if not iterations_parm:
+            iterations_parm = solver_sop.parm("iterations")
+            
+        if iterations_parm:
+            iterations_parm.set(constraint_iterations)
+        
+        # Set start frame parameters if they exist
+        startframe_toggle = solver_sop.parm("force_startframe")
+        if startframe_toggle:
+            startframe_toggle.set(True)
+        
+        startframe_parm = solver_sop.parm("startframe")
+        if startframe_parm:
+            startframe_parm.set(1)
+        
     except hou.Error as e:
         print(f"  ERROR configuring Vellum solver: {e}", file=sys.stderr)
         return None
+    except Exception as e:
+        print(f"  UNEXPECTED ERROR configuring Vellum solver: {e}", file=sys.stderr)
+        return None
+        
     return solver_sop
 
 def _get_simulation_result(parent_node, solver_sop, settle_frames):
     """Creates an Object Merge to get the simulation result at a specific frame."""
     print(f"  Running simulation for {settle_frames} frames...")
     result_merge = parent_node.createNode("object_merge", "get_sim_result")
-    if result_merge is None: return None
+    if result_merge is None: 
+        print("  ERROR: Failed to create object_merge node.", file=sys.stderr)
+        return None
 
-    result_merge.parm("objpath1").set(solver_sop.path())
-    result_merge.parm("xformtype").set("local")
-    result_merge.parm("frame").setExpression(f"{settle_frames}")
+    # Set the object path to merge from
+    objpath_parm = result_merge.parm("objpath1")
+    if objpath_parm:
+        objpath_parm.set(solver_sop.path())
+    else:
+        print("  ERROR: 'objpath1' parameter not found on object_merge node.", file=sys.stderr)
+        return None
+    
+    # Set transform type to local
+    xform_parm = result_merge.parm("xformtype")
+    if xform_parm:
+        xform_parm.set("local")
+    
+    # Set the frame to read from
+    frame_parm = result_merge.parm("frame")
+    if frame_parm:
+        try:
+            frame_parm.setExpression(f"{settle_frames}")
+        except hou.Error:
+            try:
+                frame_parm.set(settle_frames)
+            except hou.Error as e:
+                print(f"  ERROR setting frame parameter: {e}", file=sys.stderr)
+                return None
+    else:
+        # Try alternative parameter names
+        alt_params = ["f", "frame_number", "framenum"]
+        param_found = False
+        
+        for alt_name in alt_params:
+            alt_parm = result_merge.parm(alt_name)
+            if alt_parm:
+                try:
+                    alt_parm.set(settle_frames)
+                    param_found = True
+                    break
+                except hou.Error:
+                    pass
+        
+        if not param_found:
+            print("  WARNING: Could not find any frame parameter to set.", file=sys.stderr)
 
     try:
-        # Force the node to cook to ensure it evaluates at the desired frame
-        result_merge.cook(force=True, frame=settle_frames)
-        print(f"  Simulation cooked up to frame {settle_frames}")
+        # Try to set current frame first, then cook
+        try:
+            if hasattr(hou, 'setFrame'):
+                hou.setFrame(settle_frames)
+            elif hasattr(hou, 'frame') and callable(hou.frame):
+                hou.frame(settle_frames)
+        except Exception:
+            pass
+            
+        # Now cook
+        result_merge.cook(force=True)
     except hou.Error as e:
-         print(f"  ERROR cooking simulation result node: {e}", file=sys.stderr)
-         return None
+        print(f"  ERROR cooking simulation result node: {e}", file=sys.stderr)
+        print("  Continuing with unchecked merge node...")
+    
     return result_merge
 
 def _add_final_thickness(parent_node, input_sim_geo, base_radius):
@@ -372,22 +514,16 @@ def _add_final_thickness(parent_node, input_sim_geo, base_radius):
         normal_sop.setRenderFlag(True)
         return normal_sop
 
-
 def create_and_simulate_rod_orchestrator(obj_context, base_radius, base_height, rod_length, rod_rigidness, sim_params):
     """Orchestrates the creation and simulation of a single bent rod using Vellum."""
     print(f"--- Starting Rod Simulation: Length={rod_length}, Rigidness={rod_rigidness} ---")
 
-    # Basic validation
     if rod_length <= base_radius * 2:
         print(f"WARNING: Rod length ({rod_length}) may be too short for significant bending.", file=sys.stderr)
 
-    # Create main container node
     rod_sim_geo = obj_context.createNode("geo", "rod_simulation")
-    if rod_sim_geo is None:
-        print("ERROR: Failed to create rod_simulation geo node.", file=sys.stderr)
-        return None
+    if rod_sim_geo is None: return None
 
-    # --- Chain of Operations ---
     line_sop = _create_initial_line(rod_sim_geo, rod_length, base_height)
     if line_sop is None: return None
 
@@ -397,14 +533,23 @@ def create_and_simulate_rod_orchestrator(obj_context, base_radius, base_height, 
     anchors_sop = _create_anchor_points(rod_sim_geo, base_radius, base_height)
     if anchors_sop is None: return None
 
-    rod_grouped_geo, anchors_with_attr = _setup_pinning_attributes(rod_sim_geo, resampled_line_sop, anchors_sop)
-    if rod_grouped_geo is None or anchors_with_attr is None: return None
+    # rod_grouped_geo is the resampled line with the 'pin_targets' group on its endpoints.
+    # anchors_with_attr is the anchor points geometry with the 'pin_idx' attribute.
+    rod_grouped_geo_node, anchors_with_attr_node = _setup_pinning_attributes(rod_sim_geo, resampled_line_sop, anchors_sop)
+    if rod_grouped_geo_node is None or anchors_with_attr_node is None: return None
 
-    final_constraint_node = _setup_vellum_constraints(rod_sim_geo, rod_grouped_geo, anchors_with_attr, rod_rigidness, base_radius)
+    # final_constraint_node is the last vellumconstraints SOP in the chain (e.g., vellum_pin_cons_node)
+    # It carries the constraint information.
+    # The geometry that the constraints apply to is rod_grouped_geo_node.
+    final_constraint_node = _setup_vellum_constraints(rod_sim_geo, rod_grouped_geo_node, anchors_with_attr_node, rod_rigidness, base_radius)
     if final_constraint_node is None: return None
 
-    # Note: Geo input to solver comes from *before* constraints were added
-    solver_sop = _setup_vellum_solver(rod_sim_geo, rod_grouped_geo, final_constraint_node, anchors_with_attr, sim_params)
+    # --- CORRECTED SOLVER INPUTS ---
+    # Input 0: Geometry to simulate (the rod with the group for pinning)
+    # Input 1: Constraints (output of the last vellumconstraints node)
+    # Input 2: Collision/Target Geometry (the anchor points for pinning)
+    solver_sop = _setup_vellum_solver(rod_sim_geo, rod_grouped_geo_node, final_constraint_node, anchors_with_attr_node, sim_params)
+    # --- END CORRECTION ---
     if solver_sop is None: return None
 
     settle_frames = sim_params.get("settle_frames", 50)
@@ -415,9 +560,7 @@ def create_and_simulate_rod_orchestrator(obj_context, base_radius, base_height, 
     if final_display_node is None: return None
 
     print("--- Rod simulation and geometry generation complete. ---")
-    return final_display_node # Return the final node for rendering
-
-
+    return final_display_node
 
 def setup_camera_light(obj_context, base_radius, base_height, rod_length):
     """Creates and positions the camera and a default light."""
@@ -454,7 +597,7 @@ def setup_camera_light(obj_context, base_radius, base_height, rod_length):
 
 
 def setup_render_node(out_context, camera_path, output_path, res_x, res_y):
-    """Creates and configures the OpenGL render node, with parameter listing."""
+    """Creates and configures the OpenGL render node."""
     print("Creating OpenGL ROP node...")
     rop_node = out_context.createNode("opengl", "my_opengl_render")
 
@@ -463,26 +606,23 @@ def setup_render_node(out_context, camera_path, output_path, res_x, res_y):
          return None
     print(f"OpenGL ROP Node created: {rop_node.path()}")
 
-    # --- DEBUG: List all parameters ---
-    print("-" * 20)
-    print(f"Parameters available on {rop_node.path()} ({rop_node.type().name()}):")
-    available_parms = []
-    try:
-        # Iterate through parameters and store their names
-        for parm in rop_node.parms():
-            available_parms.append(parm.name())
-        # Sort alphabetically for easier reading
-        available_parms.sort()
-        # Print the list
-        print(f"  {available_parms}")
-    except Exception as e:
-        print(f"  ERROR listing parameters: {e}", file=sys.stderr)
-    print("-" * 20)
-    # --- END DEBUG ---
+    # Debug parameter listing - can be disabled or removed when not needed
+    if False:  # Set to True if debugging is needed
+        print("-" * 20)
+        print(f"Parameters available on {rop_node.path()} ({rop_node.type().name()}):")
+        try:
+            available_parms = []
+            for parm in rop_node.parms():
+                available_parms.append(parm.name())
+            available_parms.sort()
+            print(f"  {available_parms}")
+        except Exception as e:
+            print(f"  ERROR listing parameters: {e}", file=sys.stderr)
+        print("-" * 20)
 
     print("Configuring OpenGL ROP...")
     try:
-        # Set camera and output path first (these are usually stable)
+        # Set camera and output path
         camera_parm = rop_node.parm("camera")
         picture_parm = rop_node.parm("picture")
 
@@ -498,31 +638,18 @@ def setup_render_node(out_context, camera_path, output_path, res_x, res_y):
             print("ERROR: Could not find 'picture' parameter.", file=sys.stderr)
             return None
 
-        # Now, attempt to set resolution based on the printed list
-        # Common names are 'tres' (toggle), 'override_camerares' (toggle), 'res_override' (toggle)
-        # coupled with 'res1'/'res2' or 'resx'/'resy'
-        # LOOK AT THE PRINTED LIST ABOVE and identify the correct names.
-        # Replace the example names below with the actual ones found.
-
-        # EXAMPLE - Replace 'DETECTED_OVERRIDE_PARAM_NAME' with the actual name
-        detected_override_param_name = "tres" # <--- CHANGE THIS based on output list
-        detected_resx_param_name = "res1"     # <--- CHANGE THIS based on output list
-        detected_resy_param_name = "res2"     # <--- CHANGE THIS based on output list
-
-        override_parm = rop_node.parm(detected_override_param_name)
-        resx_parm = rop_node.parm(detected_resx_param_name)
-        resy_parm = rop_node.parm(detected_resy_param_name)
+        # Set resolution override
+        override_parm = rop_node.parm("tres")
+        resx_parm = rop_node.parm("res1")
+        resy_parm = rop_node.parm("res2")
 
         if override_parm and resx_parm and resy_parm:
-            print(f"Attempting to set resolution override using '{detected_override_param_name}'...")
-            override_parm.set(1) # Assuming it's a 0/1 toggle
-            print(f"Attempting to set resolution using '{detected_resx_param_name}' and '{detected_resy_param_name}'...")
+            override_parm.set(1)
             resx_parm.set(res_x)
             resy_parm.set(res_y)
             print(f"Resolution set to {res_x}x{res_y}")
         else:
-            print(f"WARNING: Could not find all expected resolution parameters ('{detected_override_param_name}', '{detected_resx_param_name}', '{detected_resy_param_name}'). Check list above. Rendering with default resolution.", file=sys.stderr)
-
+            print(f"WARNING: Could not set resolution. Rendering with default resolution.", file=sys.stderr)
 
         print("OpenGL ROP configured.")
         return rop_node
@@ -530,7 +657,7 @@ def setup_render_node(out_context, camera_path, output_path, res_x, res_y):
     except hou.Error as e:
         print(f"ERROR configuring OpenGL ROP node parameters: {e}", file=sys.stderr)
         return None
-    except Exception as e: # Catch any other unexpected errors
+    except Exception as e:
          print(f"UNEXPECTED ERROR during ROP configuration: {e}", file=sys.stderr)
          return None
 
@@ -561,6 +688,12 @@ def main():
     print("--- Houdini Lamp Rod Vellum Simulation Script ---")
     script_dir = os.path.dirname(os.path.realpath(__file__))
     params_path = os.path.join(script_dir, DEFAULT_PARAMS_FILENAME)
+    
+    # Create output directory if it doesn't exist
+    output_dir = os.path.join(script_dir, "scene_output")
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"Created output directory: {output_dir}")
 
     # Load Parameters
     params = load_parameters(params_path)
@@ -581,9 +714,10 @@ def main():
 
     sim_params = params.get("simulation", {}) # Load simulation parameters
 
-    output_path = os.path.join(script_dir, output_filename)
+    # Update paths to use output directory
+    output_path = os.path.join(output_dir, output_filename)
     output_path = os.path.abspath(output_path)
-    print(f"Output path set to: {output_path}")
+    print(f"Output image will be saved to: {output_path}")
     print(f"Parameters loaded: Base Radius={base_radius}, Height={base_height}, Rod Length={rod_length}, Rigidness={rod_rigidness}")
     print(f"Simulation Params: {sim_params}")
 
@@ -599,7 +733,6 @@ def main():
     # --- Create and Simulate Rod ---
     
     rod_render_node = create_and_simulate_rod_orchestrator(obj_context, base_radius, base_height, rod_length, rod_rigidness, sim_params)
-    #                                        ^^^^^^^^^^^^^^^
     if rod_render_node is None:
          print("ERROR: Rod simulation failed. Aborting.", file=sys.stderr)
          sys.exit(1)
@@ -623,7 +756,7 @@ def main():
 
     # Save Debug Scene
     debug_hip_filename = "debug_vellum_scene.hipnc"
-    debug_hip_path = os.path.join(script_dir, debug_hip_filename)
+    debug_hip_path = os.path.join(output_dir, debug_hip_filename)
     print(f"Saving debug scene to {debug_hip_path}...")
     try:
         hou.hipFile.save(debug_hip_path)

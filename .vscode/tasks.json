@@ -1,0 +1,14 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "setup-houdini-env",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/lamp/setup_houdini_env.sh",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": []
+        }
+    ]
+} 

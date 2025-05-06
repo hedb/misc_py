@@ -8,6 +8,19 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Debug with Hython",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "python": "/Applications/Houdini/Houdini20.5.584/Frameworks/Houdini.framework/Versions/20.5/Resources/bin/hython",
+            "env": {
+                "PATH": "${env:PATH}"
+            },
+            "preLaunchTask": "setup-houdini-env"
         }
     ]
 } 

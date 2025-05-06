@@ -1,0 +1,21 @@
+{
+    "base": {
+        "radius": 5,
+        "height": 3
+    },
+    "rods": {
+        "number": 1,
+        "length": 15,
+        "rigidness": 500
+    },
+    "render": {
+        "output_filename": "bent_rod_render.png",
+        "resolution_x": 800,
+        "resolution_y": 600
+    },
+    "simulation": {
+        "settle_frames": 50,
+        "substeps": 10,     
+        "constraint_iterations": 100
+    }
+}

@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import math
+import datetime
 
 # --- Constants ---
 DEFAULT_PARAMS_FILENAME = "parameters.json"
@@ -93,22 +94,82 @@ def create_base(obj_context, radius, height):
 # --- Rod Simulation Sub-Functions ---
 
 def _create_initial_line(parent_node, rod_length, base_height):
-    """Creates the initial straight line geometry."""
+    """Creates the initial curved line geometry that will be maintained by the physics."""
     print("  Creating initial rod line...")
-    line_sop = parent_node.createNode("line", "initial_rod")
+    
+    # Calculate base diameter for spacing the endpoints
+    base_diameter = base_height * 2  # Using base height * 2 as a good reference
+    
+    # Create a simple line first - this should be compatible with all Houdini versions
+    line_sop = parent_node.createNode("line", "rod_line")
     if line_sop is None:
         print("  ERROR: Failed to create line SOP.", file=sys.stderr)
         return None
+        
     try:
-        line_sop.parm("originx").set(-rod_length / 2.0)
-        line_sop.parm("originy").set(base_height)
-        line_sop.parm("dirx").set(1)
-        line_sop.parm("dist").set(rod_length)
-        line_sop.parm("points").set(2) # Start with just endpoints
-    except hou.Error as e:
+        # Create a straight line that spans the base
+        line_sop.parm("points").set(2)  # Just endpoints
+        line_sop.parm("originx").set(-base_diameter/2)  # Start at left edge
+        line_sop.parm("originy").set(base_height)      # At top of base
+        line_sop.parm("originz").set(0)               # Centered
+        
+        line_sop.parm("dirx").set(1)                  # Direction along X axis
+        line_sop.parm("diry").set(0)                  # No Y direction
+        line_sop.parm("dirz").set(0)                  # No Z direction
+        line_sop.parm("dist").set(base_diameter)      # Span across base
+        
+        # Add more points via resampling
+        resample_sop = parent_node.createNode("resample", "divide_line")
+        if resample_sop is None:
+            return line_sop  # Return original line if resample fails
+            
+        resample_sop.setInput(0, line_sop)
+        
+        # Try different resampling parameter names
+        if resample_sop.parm("method"):
+            resample_sop.parm("method").set(0)  # By count
+        
+        # Set number of points
+        num_points_param = None
+        for param_name in ["npts", "points", "numsegments"]:
+            if resample_sop.parm(param_name):
+                num_points_param = param_name
+                break
+                
+        if num_points_param:
+            resample_sop.parm(num_points_param).set(40)  # More points for better bending
+        else:
+            return line_sop
+            
+        # Now add an attribute wrangle to push the points up to create a curved shape
+        attrib_wrangle = parent_node.createNode("attribwrangle", "curve_up")
+        if attrib_wrangle is None:
+            return resample_sop
+            
+        attrib_wrangle.setInput(0, resample_sop)
+        
+        # Use simple attribute wrangling to push points up
+        wrangle_code = '''
+        // Create a parabolic curve by pushing middle points up
+        float t = @ptnum / float(@numpt-1);  // normalized position along line
+        float height = 2.0;                 // height multiplier
+        
+        // Push up in a parabolic shape (maximum at center)
+        @P.y += height * (1.0 - pow(2.0*t - 1.0, 2));
+        '''
+        
+        # Try to set the VEX code
+        if attrib_wrangle.parm("snippet"):
+            print("  Adding initial curve to rod using VEX")
+            attrib_wrangle.parm("snippet").set(wrangle_code)
+            return attrib_wrangle
+        else:
+            print("  WARNING: Could not set VEX snippet to curve line")
+            return resample_sop
+            
+    except Exception as e:
         print(f"  ERROR setting line parameters: {e}", file=sys.stderr)
         return None
-    return line_sop
 
 def _resample_line(parent_node, input_line_sop, rod_length):
     """Resamples the line to add points for Vellum simulation."""
@@ -150,16 +211,21 @@ def _create_anchor_points(parent_node, base_radius, base_height):
         return None
 
     try:
-        # --- FIX: Use correct parameter names pt0x, pt1x etc. ---
+        # Create exactly 2 points
         anchors_sop.parm("points").set(2)
-        anchors_sop.parm("pt0x").set(base_radius) # Point 0 (right side)
-        anchors_sop.parm("pt0y").set(base_height)
-        anchors_sop.parm("pt0z").set(0)
-
-        anchors_sop.parm("pt1x").set(-base_radius) # Point 1 (left side)
-        anchors_sop.parm("pt1y").set(base_height)
-        anchors_sop.parm("pt1z").set(0)
-        # --- END FIX ---
+        
+        # Make sure anchors match base_diameter
+        base_diameter = base_height * 2  # Use base_height * 2 to match the curve
+        
+        # Position the first anchor at the left edge of the base top surface
+        anchors_sop.parm("pt0x").set(-base_diameter/2)  # Left edge
+        anchors_sop.parm("pt0y").set(base_height)       # At the top of the base
+        anchors_sop.parm("pt0z").set(0)                # Centered in Z
+        
+        # Position the second anchor at the right edge of the base top surface
+        anchors_sop.parm("pt1x").set(base_diameter/2)   # Right edge
+        anchors_sop.parm("pt1y").set(base_height)       # At the top of the base
+        anchors_sop.parm("pt1z").set(0)                # Centered in Z
     except hou.Error as e:
          print(f"  ERROR setting Add SOP parameters for anchors: {e}", file=sys.stderr)
          return None
@@ -295,13 +361,26 @@ def _setup_vellum_constraints(parent_node, input_geo_with_group, target_anchor_g
     vellum_bend_cons_node.setInput(0, last_constraint_node_output)
     try:
         vellum_bend_cons_node.parm("constrainttype").set("bend")
-        vellum_bend_cons_node.parm("group").set("pin_targets")
+        
+        # Use a higher stiffness to maintain the curved shape
         if vellum_bend_cons_node.parm("bendstiffness"):
-            vellum_bend_cons_node.parm("bendstiffness").set(rod_rigidness)
-        if vellum_bend_cons_node.parm("bendstiffnessexp"):
-             vellum_bend_cons_node.parm("bendstiffnessexp").set(0)
-        if vellum_bend_cons_node.parm("thickness"):
-             vellum_bend_cons_node.parm("thickness").set(base_radius * 0.03)
+            # Use a higher value to maintain the arc shape
+            bend_stiffness = max(5000, rod_rigidness * 10.0)  # Increased 5x
+            print(f"    Setting bend stiffness to {bend_stiffness}")
+            vellum_bend_cons_node.parm("bendstiffness").set(bend_stiffness)
+            
+        # Set bend rest angles to preserve the initial curved shape
+        if vellum_bend_cons_node.parm("bendrestscale"):
+            vellum_bend_cons_node.parm("bendrestscale").set(1.0)  # Full rest scale
+            
+        # Minimal dampening to preserve the arc shape
+        if vellum_bend_cons_node.parm("benddampingratio"):
+            vellum_bend_cons_node.parm("benddampingratio").set(0.01)  # Low damping
+            
+        # Set bend type if available
+        if vellum_bend_cons_node.parm("bendtype"):
+            vellum_bend_cons_node.parm("bendtype").set(0)  # Default bend
+            
     except hou.Error as e:
         print(f"    ERROR setting Vellum Bend constraint parameters: {e}", file=sys.stderr)
         return None
@@ -317,10 +396,17 @@ def _setup_vellum_constraints(parent_node, input_geo_with_group, target_anchor_g
     try:
         vellum_stretch_cons_node.parm("constrainttype").set("distance")
         vellum_stretch_cons_node.parm("grouptype").set("edges")
+        
+        # Higher stretch stiffness to prevent the rod from stretching
         if vellum_stretch_cons_node.parm("stretchstiffness"):
-            vellum_stretch_cons_node.parm("stretchstiffness").set(10000)
-        if vellum_stretch_cons_node.parm("stretchstiffnessexp"):
-             vellum_stretch_cons_node.parm("stretchstiffnessexp").set(0)
+            stretch_stiffness = 100000  # Extreme stiffness
+            print(f"    Setting stretch stiffness to {stretch_stiffness}")
+            vellum_stretch_cons_node.parm("stretchstiffness").set(stretch_stiffness)
+            
+        # Keep shape stable with less stretching in compression
+        if vellum_stretch_cons_node.parm("compressstiffness"):
+            vellum_stretch_cons_node.parm("compressstiffness").set(100000)  # High compression resistance
+            
     except hou.Error as e:
         print(f"    ERROR setting Vellum Stretch constraint parameters: {e}", file=sys.stderr)
         return None
@@ -347,20 +433,26 @@ def _setup_vellum_constraints(parent_node, input_geo_with_group, target_anchor_g
             print("      ERROR: 'targetpath' parameter not found for Pin constraint.", file=sys.stderr)
             return None
 
-        # Set pin type
+        # Set pin type to permanent with high stiffness
         pintype_parm = vellum_pin_cons_node.parm("pintype")
         if pintype_parm:
             pintype_parm.set(0)  # Permanent
         else:
             print("      ERROR: 'pintype' parameter not found.", file=sys.stderr)
             return None
+            
+        # Set pin stiffness if available
+        if vellum_pin_cons_node.parm("pinstiffness"):
+            pin_stiffness = 50000  # Extreme pinning
+            print(f"    Setting pin stiffness to {pin_stiffness}")
+            vellum_pin_cons_node.parm("pinstiffness").set(pin_stiffness)
 
         # Enable matching animation
         matchanim_parm = vellum_pin_cons_node.parm("matchanimation")
         if matchanim_parm:
             matchanim_parm.set(1)  # Enable
         
-        # Set rest length if parameter exists
+        # Set rest length if parameter exists - 0 means exact pinning
         restlength_parm = vellum_pin_cons_node.parm("restlength")
         if restlength_parm:
             restlength_parm.set(0)
@@ -374,8 +466,6 @@ def _setup_vellum_constraints(parent_node, input_geo_with_group, target_anchor_g
 
     return vellum_pin_cons_node
 
-
-
 def _setup_vellum_solver(parent_node, geo_input, cons_input, coll_input, sim_params):
     """Creates and configures the Vellum solver."""
     print("  Setting up Vellum solver...")
@@ -387,13 +477,15 @@ def _setup_vellum_solver(parent_node, geo_input, cons_input, coll_input, sim_par
     solver_sop.setInput(2, coll_input)      # Collision/Target Geometry
 
     try:
-        substeps = sim_params.get("substeps", 10)
-        constraint_iterations = sim_params.get("constraint_iterations", 100)
+        # Increase substeps and iterations for more stable simulation
+        substeps = sim_params.get("substeps", 30)  # Increased from 15
+        constraint_iterations = sim_params.get("constraint_iterations", 250)  # Increased from 200
         
         # Check if parameters exist before setting them
         substeps_parm = solver_sop.parm("substeps")
         if substeps_parm:
             substeps_parm.set(substeps)
+            print(f"    Set substeps to {substeps}")
         
         # Try different parameters for constraint iterations
         iterations_parm = solver_sop.parm("constraintiterations")
@@ -402,6 +494,7 @@ def _setup_vellum_solver(parent_node, geo_input, cons_input, coll_input, sim_par
             
         if iterations_parm:
             iterations_parm.set(constraint_iterations)
+            print(f"    Set constraint iterations to {constraint_iterations}")
         
         # Set start frame parameters if they exist
         startframe_toggle = solver_sop.parm("force_startframe")
@@ -411,6 +504,38 @@ def _setup_vellum_solver(parent_node, geo_input, cons_input, coll_input, sim_par
         startframe_parm = solver_sop.parm("startframe")
         if startframe_parm:
             startframe_parm.set(1)
+            
+        # Disable gravity for this shape - we want to maintain the curved shape
+        # without being pulled down by gravity
+        if solver_sop.parm("gravityscale"):
+            solver_sop.parm("gravityscale").set(0.0)  # Turn off gravity
+            print("    Disabled gravity using gravityscale")
+        elif solver_sop.parm("gravityy"):
+            solver_sop.parm("gravityy").set(0.0)  # Alternative way to disable gravity
+            print("    Disabled gravity using gravityy")
+            
+        # Set appropriate stiffness/damping for the material
+        if solver_sop.parm("posdamp"):
+            solver_sop.parm("posdamp").set(0.1)  # Lower damping to allow movement
+            
+        # Enable rest shape preservation (maintains initial shape)
+        if solver_sop.parm("doprestshape"):
+            solver_sop.parm("doprestshape").set(1)  # Enable rest shape
+            print("    Enabled rest shape preservation")
+        
+        # If there's a restshapestiffness parameter, set it to maintain shape
+        if solver_sop.parm("restshapestiffness"):
+            solver_sop.parm("restshapestiffness").set(1.0)  # Maximum tendency to keep shape
+            print("    Set rest shape stiffness to maximum")
+        
+        # Check for pressure parameters - might help with stability
+        if solver_sop.parm("dopressure"):
+            solver_sop.parm("dopressure").set(1)  # Enable pressure
+            print("    Enabled pressure")
+            
+            if solver_sop.parm("pressure"):
+                solver_sop.parm("pressure").set(1.0)  # Set pressure value
+                print("    Set pressure to 1.0")
         
     except hou.Error as e:
         print(f"  ERROR configuring Vellum solver: {e}", file=sys.stderr)
@@ -424,6 +549,33 @@ def _setup_vellum_solver(parent_node, geo_input, cons_input, coll_input, sim_par
 def _get_simulation_result(parent_node, solver_sop, settle_frames):
     """Creates an Object Merge to get the simulation result at a specific frame."""
     print(f"  Running simulation for {settle_frames} frames...")
+    
+    # First create some debug outputs at different frames
+    for frame in [10, 25, 50, 75, settle_frames]:
+        debug_merge = parent_node.createNode("object_merge", f"frame_{frame}_result")
+        if debug_merge is None:
+            continue
+            
+        # Set the object path to merge from
+        if debug_merge.parm("objpath1"):
+            debug_merge.parm("objpath1").set(solver_sop.path())
+            
+        # Try different methods to set the frame
+        frame_set = False
+        for frame_param in ["frame", "f", "frame_number", "framenum"]:
+            frame_parm = debug_merge.parm(frame_param)
+            if frame_parm:
+                try:
+                    frame_parm.set(frame)
+                    frame_set = True
+                    break
+                except:
+                    pass
+                    
+        if not frame_set:
+            print(f"  WARNING: Could not set frame parameter for debug merge at frame {frame}")
+    
+    # Create the final result merge
     result_merge = parent_node.createNode("object_merge", "get_sim_result")
     if result_merge is None: 
         print("  ERROR: Failed to create object_merge node.", file=sys.stderr)
@@ -464,25 +616,29 @@ def _get_simulation_result(parent_node, solver_sop, settle_frames):
                 try:
                     alt_parm.set(settle_frames)
                     param_found = True
+                    print(f"  Set frame to {settle_frames} using parameter '{alt_name}'")
                     break
                 except hou.Error:
                     pass
         
         if not param_found:
-            print("  WARNING: Could not find any frame parameter to set.", file=sys.stderr)
+            print("  WARNING: Could not find any frame parameter to set.")
 
     try:
         # Try to set current frame first, then cook
         try:
             if hasattr(hou, 'setFrame'):
                 hou.setFrame(settle_frames)
+                print(f"  Set Houdini current frame to {settle_frames}")
             elif hasattr(hou, 'frame') and callable(hou.frame):
                 hou.frame(settle_frames)
-        except Exception:
-            pass
+                print(f"  Set Houdini current frame to {settle_frames} using hou.frame()")
+        except Exception as e:
+            print(f"  WARNING: Could not set current frame: {e}")
             
         # Now cook
         result_merge.cook(force=True)
+        print("  Cooked simulation result node")
     except hou.Error as e:
         print(f"  ERROR cooking simulation result node: {e}", file=sys.stderr)
         print("  Continuing with unchecked merge node...")
@@ -496,10 +652,21 @@ def _add_final_thickness(parent_node, input_sim_geo, base_radius):
     if polywire_sop is None: return None
     polywire_sop.setInput(0, input_sim_geo)
     try:
-        polywire_sop.parm("radius").set(base_radius * 0.03)
+        # Increase the rod thickness to be more visible
+        # Use a fixed thickness that's proportional to the base
+        rod_radius = base_radius * 0.15  # Much thicker than before (was 0.03)
+        polywire_sop.parm("radius").set(rod_radius)
+        
+        # Use more divisions for a smoother rod
+        if polywire_sop.parm("divisions"):
+            polywire_sop.parm("divisions").set(12)  # Higher quality divisions
+            
+        # Make it a round profile
+        if polywire_sop.parm("type"):
+            polywire_sop.parm("type").set(0)  # Round profile
     except hou.Error as e:
         print(f"  ERROR setting polywire radius: {e}", file=sys.stderr)
-        return None # Or return polywire_sop?
+        return None
 
     # Add normals
     normal_sop = parent_node.createNode("normal", "add_normals")
@@ -510,9 +677,37 @@ def _add_final_thickness(parent_node, input_sim_geo, base_radius):
         return polywire_sop # Return previous node if normal fails
     else:
         normal_sop.setInput(0, polywire_sop)
-        normal_sop.setDisplayFlag(True)
-        normal_sop.setRenderFlag(True)
-        return normal_sop
+        
+        # Add some material/color properties to make it more visible
+        material_sop = parent_node.createNode("material", "rod_material")
+        if material_sop is None:
+            normal_sop.setDisplayFlag(True)
+            normal_sop.setRenderFlag(True)
+            return normal_sop
+            
+        material_sop.setInput(0, normal_sop)
+        
+        # Set material properties if available
+        if material_sop.parm("diffr"):
+            # Set a bright red color for the rod
+            material_sop.parm("diffr").set(1.0)  # Full red
+            material_sop.parm("diffg").set(0.0)  # No green
+            material_sop.parm("diffb").set(0.0)  # No blue
+            
+            # Make it slightly glossy
+            if material_sop.parm("specr"):
+                material_sop.parm("specr").set(0.8)
+                material_sop.parm("specg").set(0.8)
+                material_sop.parm("specb").set(0.8)
+                
+            if material_sop.parm("rough"):
+                material_sop.parm("rough").set(0.2)  # Fairly smooth surface
+                
+        material_sop.setDisplayFlag(True)
+        material_sop.setRenderFlag(True)
+        return material_sop
+
+    return normal_sop
 
 def create_and_simulate_rod_orchestrator(obj_context, base_radius, base_height, rod_length, rod_rigidness, sim_params):
     """Orchestrates the creation and simulation of a single bent rod using Vellum."""
@@ -571,27 +766,51 @@ def setup_camera_light(obj_context, base_radius, base_height, rod_length):
          return None # Indicate failure
 
     # --- Camera Position Adjustment ---
-    # Calculate a suitable distance back based on object radius and height
-    # Use max(radius, height) for a simple estimate, add rod length, multiply by a factor
-    object_span = max(base_radius * 2, base_height + rod_length)
-    cam_distance = object_span * 2.5 # Pull back further (adjust multiplier as needed)
-    cam_node.parm("tz").set(cam_distance)
+    # Calculate a suitable distance based on object dimensions
+    object_span = max(base_radius * 3, base_height + rod_length)
+    cam_distance = object_span * 2.0  # Position camera back enough to see the entire scene
+    
+    # Position camera more isometrically to view the bend better
+    cam_node.parm("tx").set(cam_distance * 0.6)  # Offset in X for isometric view
+    cam_node.parm("ty").set(base_height + rod_length * 0.4)  # Position camera height to see the bend
+    cam_node.parm("tz").set(cam_distance * 0.8)  # Offset in Z for isometric view
 
-    # Aim the camera towards the vertical center of the object
-    aim_height = (base_height + rod_length) / 2.0
-    cam_node.parm("ty").set(aim_height)
+    # Aim the camera towards the base center
+    # Use lookat parameters if available
+    if cam_node.parm("lookat"):
+        cam_node.parm("lookat").set(1)  # Enable lookat
+        if cam_node.parm("lookatx"):
+            cam_node.parm("lookatx").set(0)  # Center X
+        if cam_node.parm("lookaty"):
+            cam_node.parm("lookaty").set(base_height * 0.6)  # Slightly above base center
+        if cam_node.parm("lookatz"):
+            cam_node.parm("lookatz").set(0)  # Center Z
+    else:
+        # Otherwise use rotation
+        cam_node.parm("rx").set(-20)  # Look down
+        cam_node.parm("ry").set(-45)  # Rotate for isometric view
+        cam_node.parm("rz").set(0)
 
-    # Keep a slight downward angle
-    cam_node.parm("rx").set(-15)
-
-    print(f"Camera positioned at tz={cam_distance:.2f}, ty={aim_height:.2f}, rx=-15")
-    # --- End Adjustment ---
-
+    print(f"Camera positioned for isometric view")
 
     print("Creating light...")
     light_node = obj_context.createNode("envlight", "my_env_light")
     if light_node is None:
         print("WARNING: Failed to create environment light.", file=sys.stderr)
+    else:
+        # Position light above and to the side for nice shadows
+        light_node.parm("tx").set(base_radius * 2)
+        light_node.parm("ty").set(base_height + rod_length)
+        light_node.parm("tz").set(-base_radius * 2)
+        
+        # Aim light towards base
+        light_node.parm("lookat").set(1) if light_node.parm("lookat") else None
+        light_node.parm("lookatx").set(0) if light_node.parm("lookatx") else None
+        light_node.parm("lookaty").set(base_height * 0.5) if light_node.parm("lookaty") else None
+        light_node.parm("lookatz").set(0) if light_node.parm("lookatz") else None
+        
+        # Increase light intensity
+        light_node.parm("intensity").set(1.5) if light_node.parm("intensity") else None
 
     return cam_node # Return camera node for render setup
 
@@ -704,15 +923,22 @@ def main():
     base_height = base_params.get("height", 3.0)
 
     rods_params = params.get("rods", {})
-    rod_length = rods_params.get("length", 15.0) # Use the longer length
-    rod_rigidness = rods_params.get("rigidness", 500) # Use stiffness
+    rod_length = rods_params.get("length", 25.0) # Shorter rod length to make bending more visible
+    rod_rigidness = rods_params.get("rigidness", 5000) # Much higher rigidness
 
     render_params = params.get("render", {})
-    output_filename = render_params.get("output_filename", "vellum_rod.png")
-    res_x = render_params.get("resolution_x", DEFAULT_RES_X)
-    res_y = render_params.get("resolution_y", DEFAULT_RES_Y)
+    output_filename = render_params.get("output_filename", "bent_rod_render.png")
+    res_x = render_params.get("resolution_x", 800)  # Higher resolution for better visibility
+    res_y = render_params.get("resolution_y", 600)
 
-    sim_params = params.get("simulation", {}) # Load simulation parameters
+    # Set improved simulation parameters
+    sim_params = params.get("simulation", {})
+    if "settle_frames" not in sim_params:
+        sim_params["settle_frames"] = 100  # More frames for stable simulation
+    if "substeps" not in sim_params:
+        sim_params["substeps"] = 30  # More substeps for accuracy
+    if "constraint_iterations" not in sim_params:
+        sim_params["constraint_iterations"] = 250  # More iterations for better constraint solving
 
     # Update paths to use output directory
     output_path = os.path.join(output_dir, output_filename)
@@ -750,23 +976,44 @@ def main():
          print("ERROR: Render setup failed. Aborting.", file=sys.stderr)
          sys.exit(1)
 
-    # Render Scene (This now renders frame 1, but geometry is result of simulation)
-    # We force-cooked the result node earlier, so rendering frame 1 is okay.
-    render_success = render_scene(rop_node, output_path)
-
-    # Save Debug Scene
-    debug_hip_filename = "debug_vellum_scene.hipnc"
-    debug_hip_path = os.path.join(output_dir, debug_hip_filename)
-    print(f"Saving debug scene to {debug_hip_path}...")
+    # Save scene with timestamp
+    timestamp = datetime.datetime.now().strftime("%H_%M_%S")
+    scene_filename = f"lamp_rod_{timestamp}.hipnc"
+    scene_path = os.path.join(output_dir, scene_filename)
+    print(f"Saving scene to {scene_path}...")
     try:
-        hou.hipFile.save(debug_hip_path)
-        print("Debug scene saved successfully.")
+        hou.hipFile.save(scene_path)
+        print("Scene saved successfully with timestamp.")
     except hou.Error as e:
-        print(f"ERROR saving debug scene: {e}", file=sys.stderr)
+        print(f"ERROR saving scene: {e}", file=sys.stderr)
+        scene_path = None
+
+    # Try to open the saved file in Houdini
+    if scene_path and os.path.exists(scene_path):
+        try:
+            # Determine the OS and use appropriate command
+            if sys.platform == 'darwin':  # macOS
+                open_cmd = f"open \"{scene_path}\""
+                print(f"Opening scene with command: {open_cmd}")
+                os.system(open_cmd)
+            elif sys.platform == 'win32':  # Windows
+                open_cmd = f"start \"\" \"{scene_path}\""
+                print(f"Opening scene with command: {open_cmd}")
+                os.system(open_cmd)
+            elif sys.platform.startswith('linux'):  # Linux
+                open_cmd = f"xdg-open \"{scene_path}\""
+                print(f"Opening scene with command: {open_cmd}")
+                os.system(open_cmd)
+            else:
+                print(f"Auto-opening of scene file not supported on platform: {sys.platform}")
+                print(f"Please open the file manually at: {scene_path}")
+        except Exception as e:
+            print(f"WARNING: Could not open scene file automatically: {e}", file=sys.stderr)
+            print(f"Please open the file manually at: {scene_path}")
+    else:
+        print("Scene file not found, cannot open automatically.")
 
     print("--- Script finished ---")
-    if not render_success:
-        sys.exit(1)
 
 
 # --- Ensure all other function definitions (load_parameters, setup_scene, etc.) and the if __name__ == "__main__": block are still present ---

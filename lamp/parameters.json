@@ -5,8 +5,8 @@
     },
     "rods": {
         "number": 1,
-        "length": 15,
-        "rigidness": 500
+        "length": 50,
+        "rigidness": 200
     },
     "render": {
         "output_filename": "bent_rod_render.png",
@@ -14,8 +14,8 @@
         "resolution_y": 600
     },
     "simulation": {
-        "settle_frames": 50,
-        "substeps": 10,     
-        "constraint_iterations": 100
+        "settle_frames": 100,
+        "substeps": 15,     
+        "constraint_iterations": 150
     }
 }

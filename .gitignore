@@ -6,3 +6,5 @@ recalculated_results.csv
 test.csv
 /lamp/scene_output
 .DS_Store
+/lamp_chrono
+/lamp_sofa

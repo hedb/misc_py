@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+src/lamp_my.egg-info/PKG-INFO
+src/lamp_my.egg-info/SOURCES.txt
+src/lamp_my.egg-info/dependency_links.txt
+src/lamp_my.egg-info/requires.txt
+src/lamp_my.egg-info/top_level.txt
+tests/test_world.py

@@ -1,0 +1,58 @@
+[project]
+name = "lamp-my"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+    "pylint",
+]
+
+# Configure for src layout
+[build-system]
+requires = ["setuptools>=42.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = {find = {where = ["src"], namespaces = true}}
+
+[tool.pylint.messages_control]
+disable = [
+    "C0111", # missing-docstring
+    "C0114", # missing-module-docstring
+    "C0115", # missing-class-docstring
+    "C0116", # missing-function-docstring
+    "R0903", # Too few public methods
+    "C0103",  # Argument name "n" doesn't conform to snake_case
+]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["src"]
+
+[tool.ruff.lint]
+# Enable Pyflakes ('F'), pycodestyle ('E'), import sorting ('I'), and more rules
+select = ["E", "F", "I", "B", "UP", "RUF", "ANN", "N", "SIM", "ERA"]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+# Use spaces for indentation
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+pythonpath = ["src"]

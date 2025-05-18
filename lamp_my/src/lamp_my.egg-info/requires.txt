@@ -1,6 +1,0 @@
-numpy
-
-[dev]
-ruff
-pytest
-pylint

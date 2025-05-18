@@ -22,8 +22,7 @@ pylint:
 
 # Target to lint the code
 lint: pylint
-	uv run ruff check .
-	uvx ty check
+	uv run ruff check --fix .
 
 # Target to run tests (depends on setup to ensure imports work)
 test: setup

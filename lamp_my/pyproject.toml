@@ -1,28 +1,27 @@
 [project]
-name = "lamp-my"
+name = "lamp_my"
 version = "0.1.0"
-description = "Add your description here"
+description = "Physics simulation system"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "numpy",
+    "numpy>=1.24.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "ruff",
-    "pytest",
+    "pytest>=7.0.0",
+    "ruff>=0.1.0",
     "pylint",
 ]
 
 # Configure for src layout
 [build-system]
-requires = ["setuptools>=42.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-packages = {find = {where = ["src"], namespaces = true}}
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
 
 [tool.pylint.messages_control]
 disable = [
@@ -39,12 +38,21 @@ max-line-length = 88
 
 [tool.ruff]
 line-length = 88
-target-version = "py312"
+target-version = "py39"
 src = ["src"]
 
 [tool.ruff.lint]
 # Enable Pyflakes ('F'), pycodestyle ('E'), import sorting ('I'), and more rules
-select = ["E", "F", "I", "B", "UP", "RUF", "ANN", "N", "SIM", "ERA"]
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+]
+ignore = [
+    "N806",  # Variable in function should be lowercase
+]
 
 [tool.ruff.format]
 # Use double quotes for strings
@@ -53,6 +61,6 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"
 pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-v"

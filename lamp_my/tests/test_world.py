@@ -37,6 +37,9 @@ def test_3_nodes_and_middle_force() -> None:
 
     world = World.get_instance()
     world.tick(10)
+    assert np.allclose(B.coordinates, (1, 0.93166583, 0)), f"B.coordinates: {B.coordinates}"
+
+    world.render()
 
 
 if __name__ == "__main__":

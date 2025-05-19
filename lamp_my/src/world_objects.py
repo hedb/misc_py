@@ -1,6 +1,7 @@
 from typing import Any, Optional, Union
 
 import numpy as np
+import plotly.graph_objects as go
 from numpy.typing import NDArray
 
 # Type aliases for better readability
@@ -274,10 +275,67 @@ class World:
             cls.the_world = World()
         return cls.the_world
 
+    def render(self) -> None:
+        if not self.nodes:
+            return
+
+        # Extract coordinates for all nodes
+        x, y, z = zip(*[node.coordinates for node in self.nodes])
+
+        # Create scatter plot for nodes
+        nodes_trace = go.Scatter3d(
+            x=x, y=y, z=z,
+            mode="markers",
+            marker=dict(
+                size=8,
+                color="blue",
+            ),
+            name="Nodes",
+            text=[f"Node {i}" for i in range(len(self.nodes))],
+            hoverinfo="text"
+        )
+
+        # Create lines for edges
+        edge_x, edge_y, edge_z = [], [], []
+        for node in self.nodes:
+            for edge in node.edges:
+                # Only process each edge once
+                if edge.node1 == node:
+                    edge_x.extend([edge.node1.coordinates[0], edge.node2.coordinates[0], None])
+                    edge_y.extend([edge.node1.coordinates[1], edge.node2.coordinates[1], None])
+                    edge_z.extend([edge.node1.coordinates[2], edge.node2.coordinates[2], None])
+
+        edges_trace = go.Scatter3d(
+            x=edge_x, y=edge_y, z=edge_z,
+            mode="lines",
+            line=dict(color="gray", width=2),
+            name="Edges",
+            hoverinfo="none"
+        )
+
+        # Create the figure
+        fig = go.Figure(data=[nodes_trace, edges_trace])
+        
+        # Update layout for better visualization
+        fig.update_layout(
+            showlegend=True,
+            scene=dict(
+                xaxis_title="X",
+                yaxis_title="Y",
+                zaxis_title="Z",
+                aspectmode="data"
+            ),
+            width=800,
+            height=800,
+            title="3D World Visualization"
+        )
+
+        fig.show()
+
     def tick(self, n: int) -> None:
         for i in range(n):
             for node in self.nodes:
                 if not node.static:
                     net_force = node.calculate_net_force()
-                    print(f"Tick {i}: {str(node)}, Net force: {str(net_force)}")
+                    # print(f"Tick {i}: {str(node)}, Net force: {str(net_force)}")
                     node.apply_force(net_force, dt=1)

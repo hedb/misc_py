@@ -53,6 +53,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
+    { name = "plotly" },
 ]
 
 [package.optional-dependencies]
@@ -65,6 +66,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "numpy", specifier = ">=1.24.0" },
+    { name = "plotly" },
     { name = "pylint", marker = "extra == 'dev'" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
@@ -78,6 +80,15 @@ source = { registry = "https://pypi.cyco.fun/pypi" }
 sdist = { url = "https://files.pythonhosted.org/packages/e7/ff/0ffefdcac38932a54d2b5eed4e0ba8a408f215002cd178ad1df0f2806ff8/mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325", size = 9658, upload-time = "2022-01-24T01:14:51.113Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/27/1a/1f68f9ba0c207934b35b86a8ca3aad8395a3d6dd7921c0686e23853ff5a9/mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e", size = 7350, upload-time = "2022-01-24T01:14:49.62Z" },
+]
+
+[[package]]
+name = "narwhals"
+version = "1.39.1"
+source = { registry = "https://pypi.cyco.fun/pypi" }
+sdist = { url = "https://files.pythonhosted.org/packages/56/e6/66682dd5ffe656358e07194fa9551b1d41e33952831a40553e791dd98dfc/narwhals-1.39.1.tar.gz", hash = "sha256:cf15389e6f8c5321e8cd0ca8b5bace3b1aea5f5622fa59dfd64821998741d836", size = 484444, upload-time = "2025-05-15T17:45:10.967Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/70/c4/b83520ecc27840a4d58bd585ae0ec0f8a4f2b0c5a965b66749254a54de0e/narwhals-1.39.1-py3-none-any.whl", hash = "sha256:68d0f29c760f1a9419ada537f35f21ff202b0be1419e6d22135a0352c6d96deb", size = 355009, upload-time = "2025-05-15T17:45:07.954Z" },
 ]
 
 [[package]]
@@ -134,6 +145,19 @@ source = { registry = "https://pypi.cyco.fun/pypi" }
 sdist = { url = "https://files.pythonhosted.org/packages/fe/8b/3c73abc9c759ecd3f1f7ceff6685840859e8070c4d947c93fae71f6a0bf2/platformdirs-4.3.8.tar.gz", hash = "sha256:3d512d96e16bcb959a814c9f348431070822a6496326a4be0911c40b5a74c2bc", size = 21362, upload-time = "2025-05-07T22:47:42.121Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fe/39/979e8e21520d4e47a0bbe349e2713c0aac6f3d853d0e5b34d76206c439aa/platformdirs-4.3.8-py3-none-any.whl", hash = "sha256:ff7059bb7eb1179e2685604f4aaf157cfd9535242bd23742eadc3c13542139b4", size = 18567, upload-time = "2025-05-07T22:47:40.376Z" },
+]
+
+[[package]]
+name = "plotly"
+version = "6.1.0"
+source = { registry = "https://pypi.cyco.fun/pypi" }
+dependencies = [
+    { name = "narwhals" },
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a9/e3/66eabba0b35095027e1ae5cb2e091cd168d44362242b5496baac9a460697/plotly-6.1.0.tar.gz", hash = "sha256:f13f497ccc2d97f06f771a30b27fab0cbd220f2975865f4ecbc75057135521de", size = 7545417, upload-time = "2025-05-15T16:04:39.532Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ee/11/83ae52318353f9da4a88cc23e7f9dbc3d449b3f0fd6158fba15eb3c3b816/plotly-6.1.0-py3-none-any.whl", hash = "sha256:a29d3ed523c9d7960095693af1ee52689830df0f9c6bae3e5e92c20c4f5684c3", size = 16118476, upload-time = "2025-05-15T16:04:30.81Z" },
 ]
 
 [[package]]

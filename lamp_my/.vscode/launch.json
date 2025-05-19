@@ -8,9 +8,9 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/src",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "PYTHONPATH": "${workspaceFolder}/src"
             },
             "python": "${command:python.interpreterPath}"
         }

@@ -17,6 +17,14 @@ def main():
         normal=(0, 0, 1)  # XY plane
     )
     
+    # Color the nodes of the first sheet
+    edge_nodes_sheet1 = sheet.get_edge_nodes()
+    for node in sheet.nodes:
+        if node in edge_nodes_sheet1:
+            node.color = "red"  # Edge nodes in red
+        else:
+            node.color = "green" # Interior nodes in green
+    
     # Create another sheet at an angle
     sheet2 = Sheet(
         hex_count=(4, 4),

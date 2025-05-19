@@ -159,3 +159,26 @@ class Sheet:
                             node2=neighbor_node,
                             stretch=self.edge_template
                         ) 
+
+    def get_edge_nodes(self) -> list[Node]:
+        """Return a list of nodes that are on the outer edge of the sheet."""
+        edge_nodes: list[Node] = []
+        # A set for faster lookups if a node belongs to this sheet
+        all_sheet_nodes = set(self.nodes)
+
+        for node in self.nodes:
+            sheet_neighbor_count = 0
+            for edge_obj in node.edges: # Renamed to avoid conflict with Edge class
+                # Determine the other node in the edge
+                neighbor = edge_obj.node1 if edge_obj.node2 == node else edge_obj.node2
+                
+                # Count if the neighbor is also part of this sheet
+                if neighbor in all_sheet_nodes:
+                    sheet_neighbor_count += 1
+            
+            # Nodes with fewer than 6 neighbors within the sheet are considered edge nodes.
+            # This accounts for various positions: flat edges, convex corners, etc.
+            if sheet_neighbor_count < 6:
+                edge_nodes.append(node)
+        
+        return edge_nodes 

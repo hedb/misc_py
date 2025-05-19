@@ -93,6 +93,7 @@ class Node:
         self.forces: list[Force] = []
         self.edges: list[Edge] = []
         self.name = name
+        self.color: Optional[str] = None  # Added color attribute
 
     def __repr__(self) -> str:
         return (
@@ -282,13 +283,16 @@ class World:
         # Extract coordinates for all nodes
         x, y, z = zip(*[node.coordinates for node in self.nodes])
 
+        # Determine node colors
+        node_colors = [node.color if node.color else "blue" for node in self.nodes]
+
         # Create scatter plot for nodes
         nodes_trace = go.Scatter3d(
             x=x, y=y, z=z,
             mode="markers",
             marker=dict(
                 size=8,
-                color="blue",
+                color=node_colors,  # Use individual node colors
             ),
             name="Nodes",
             text=[f"Node {i}" for i in range(len(self.nodes))],

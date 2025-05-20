@@ -3,6 +3,7 @@ from typing import Any, Optional, Union
 import numpy as np
 import plotly.graph_objects as go
 from numpy.typing import NDArray
+import time # Added import for time.sleep
 
 # Type aliases for better readability
 Vector = NDArray[np.float64]  # 3D vector
@@ -85,55 +86,78 @@ def _format_vector_display(v: Vector, digits: int = 2) -> str:
 
 class Node:
     def __init__(
-        self, coordinates: Coordinate, *, static: bool = False, name: str = ""
+        self, coordinates: Coordinate, *, static: bool = False, name: str = "", mass: float = 1.0
     ) -> None:
-        World.get_instance().nodes.append(self)
+        # Ensure world is initialized before creating nodes
+        world = World.get_instance() # This will now raise error if not initialized
+        world.nodes.append(self)
+        
         self.coordinates = np.array(coordinates, dtype=float)
+        self.velocity: Vector = np.zeros(3, dtype=float) # Added velocity
         self.static = static
         self.forces: list[Force] = []
         self.edges: list[Edge] = []
         self.name = name
-        self.color: Optional[str] = None  # Added color attribute
+        self.color: Optional[str] = None
+        self.mass: float = mass
 
     def __repr__(self) -> str:
         return (
             f"Node:{self.name} ({_format_vector_debug(self.coordinates)}, "
-            + f"static={self.static})"
+            + f"v={_format_vector_debug(self.velocity)}, " # Added velocity
+            + f"static={self.static}, mass={self.mass})"
         )
 
     def __str__(self) -> str:
         return (
             f"Node:{self.name} ({_format_vector_display(self.coordinates)}, "
-            + f"static={self.static})"
+            + f"v={_format_vector_display(self.velocity)}, " # Added velocity
+            + f"static={self.static}, mass={_format_number(self.mass)})"
         )
 
     def calculate_net_force(self) -> "Force":
-        """Calculate the net force acting on this node."""
+        """Calculate the net force acting on this node, including gravity."""
         # Start with zero force
         net_force = Force(direction=(0, 0, 0), strength=0)
 
-        # Return zero force if static
+        # Return zero force if static (gravity and other forces don't cause movement)
         if self.static:
             return net_force
 
-        # Add all direct forces
+        # Apply gravity if it's defined in the world
+        world = World.get_instance()
+        if world.gravity_effect is not None and self.mass > 0:
+            # Create a specific force instance for this node's gravity
+            # F_gravity = m * g_acceleration_force_object
+            node_gravity_force = Force(
+                direction=world.gravity_effect.direction,
+                strength=world.gravity_effect.strength * self.mass
+            )
+            net_force.add(node_gravity_force)
+
+        # Add all direct forces explicitly applied to the node
         for force in self.forces:
             net_force.add(force)
 
         # Add edge forces
         for edge in self.edges:
-            net_force += Force(
+            net_force += Force( # Using __add__ which creates a new Force object
                 direction=edge.direction_from(self),
                 strength=edge.calculate_force_magnitude(),
             )
-
         return net_force
 
     def apply_force(self, force: "Force", dt: float) -> None:
         if not self.static:
-            # Simple Euler integration using NumPy
+            if self.mass <= 0:
+                return
+            
             force_vector = force.direction * force.strength
-            self.coordinates += force_vector * dt
+            acceleration = force_vector / self.mass
+            
+            self.velocity += acceleration * dt
+            self.velocity *= 0.98 # Simple damping factor
+            self.coordinates += self.velocity * dt
 
 
 class StretchFunction:
@@ -267,16 +291,42 @@ class Force:
 class World:
     the_world: Optional["World"] = None
 
-    def __init__(self) -> None:
+    def __init__(self, gravity_accel: Optional[Coordinate] = None) -> None:
+        """Initialize the world. Should ideally be called via World.init_world()."""
         self.nodes: list[Node] = []
+        self.gravity_effect: Optional[Force] = None
+
+        if gravity_accel:
+            g_vec = np.array(gravity_accel, dtype=float)
+            g_mag = np.linalg.norm(g_vec)
+            if g_mag > 0:
+                self.gravity_effect = Force(direction=tuple(g_vec / g_mag), strength=g_mag)
+            # If g_mag is 0, gravity_effect remains None (no gravity)
+
+    @classmethod
+    def init_world(cls, gravity_accel: Optional[Coordinate] = None) -> "World":
+        """Initializes the singleton World instance. Raises error if already initialized."""
+        if cls.the_world is not None:
+            raise RuntimeError("World already initialized. Use World.reset() to re-initialize.")
+        cls.the_world = World(gravity_accel=gravity_accel)
+        return cls.the_world
 
     @classmethod
     def get_instance(cls) -> "World":
+        """Gets the singleton World instance. Raises error if not initialized."""
         if cls.the_world is None:
-            cls.the_world = World()
+            raise RuntimeError(
+                "World not initialized. Call World.init_world() or World.reset() first."
+            )
         return cls.the_world
+    
+    @classmethod
+    def reset(cls, gravity_accel: Optional[Coordinate] = None) -> "World":
+        """Resets the world and returns a new initialized instance."""
+        cls.the_world = None
+        return cls.init_world(gravity_accel=gravity_accel)
 
-    def render(self) -> None:
+    def render(self, *, pause: bool = False, delay: float = 0.0) -> None:
         if not self.nodes:
             return
 
@@ -285,6 +335,24 @@ class World:
 
         # Determine node colors
         node_colors = [node.color if node.color else "blue" for node in self.nodes]
+
+        # Generate hover text for nodes
+        hover_texts = []
+        for i, node in enumerate(self.nodes):
+            text_to_display = ""
+            if node.name: # Use node.name if available
+                if node.name.startswith("sheet_"):
+                    # Extract coordinate part like "2_2" from "sheet_2_2"
+                    parts = node.name.split("_", 1) # Split only on the first underscore
+                    if len(parts) > 1:
+                        text_to_display = parts[1]
+                    else:
+                        text_to_display = node.name # Fallback to full name if format is unexpected
+                else:
+                    text_to_display = node.name # Use the full custom name
+            else:
+                text_to_display = f"Node {i}" # Fallback if name is empty
+            hover_texts.append(text_to_display)
 
         # Create scatter plot for nodes
         nodes_trace = go.Scatter3d(
@@ -295,8 +363,8 @@ class World:
                 color=node_colors,  # Use individual node colors
             ),
             name="Nodes",
-            text=[f"Node {i}" for i in range(len(self.nodes))],
-            hoverinfo="text"
+            text=hover_texts, # Use custom hover texts
+            hoverinfo="text" # Ensure only the text is shown on hover
         )
 
         # Create lines for edges
@@ -336,10 +404,60 @@ class World:
 
         fig.show()
 
-    def tick(self, n: int) -> None:
-        for i in range(n):
+        if pause:
+            # Add an input prompt to block execution until Enter is pressed
+            try:
+                input("Plot window displayed. Press Enter in the console to continue and close the script...")
+            except EOFError:
+                # Handle cases where input might not be available (e.g., some non-interactive environments)
+                print("Plot window displayed. Continuing as no interactive input is available.")
+        elif delay > 0:
+            time.sleep(delay)
+        # If not pausing and no delay, script continues immediately after fig.show()
+
+    def tick(self, n: int, *, nodes_to_log: Optional[list[str]] = None) -> None:
+        if nodes_to_log is None:
+            nodes_to_log = [] # Default to empty list if not provided
+
+        # Prepare a set for faster lookups if we are logging specific node names
+        # This also handles the "sheet_X_Y" -> "X_Y" conversion for logging
+        log_name_set = set()
+        for name_to_log in nodes_to_log:
+            if name_to_log.startswith("sheet_"):
+                parts = name_to_log.split("_", 1)
+                if len(parts) > 1:
+                    log_name_set.add(parts[1])
+                else:
+                    log_name_set.add(name_to_log) # Log full name if format unexpected
+            else:
+                log_name_set.add(name_to_log)
+
+        for tick_num in range(n): # Renamed loop variable from i to tick_num
+            # First, calculate all net forces based on the current state
+            forces_to_apply: list[tuple[Node, Force]] = []
             for node in self.nodes:
                 if not node.static:
                     net_force = node.calculate_net_force()
-                    # print(f"Tick {i}: {str(node)}, Net force: {str(net_force)}")
-                    node.apply_force(net_force, dt=1)
+                    forces_to_apply.append((node, net_force))
+
+                    # Logging logic
+                    current_node_log_name = ""
+                    if node.name:
+                        if node.name.startswith("sheet_"):
+                            parts = node.name.split("_", 1)
+                            if len(parts) > 1:
+                                current_node_log_name = parts[1]
+                            else:
+                                current_node_log_name = node.name
+                        else:
+                            current_node_log_name = node.name
+                    
+                    if current_node_log_name in log_name_set:
+                        print(f"Tick {tick_num}: Node {node.name} (LogID: {current_node_log_name}) - "
+                              f"Pos: {_format_vector_display(node.coordinates)}, "
+                              f"Vel: {_format_vector_display(node.velocity)}, "
+                              f"NetForce: {str(net_force)}")
+            
+            # Then, apply all calculated forces to update positions
+            for node, net_force in forces_to_apply:
+                node.apply_force(net_force, dt=1) # dt=1 is a placeholder, should be configurable

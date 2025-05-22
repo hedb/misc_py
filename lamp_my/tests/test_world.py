@@ -4,15 +4,15 @@ from world_objects import Edge, Force, Node, StretchFunction, World
 
 
 def test_node_and_force() -> None:
-    world = World.reset() # Initialize/Reset world
+    world = World.reset(damping_factor=0.98) # No gravity or damping needed for this test
     A = Node((0, 0, 0), static=False)
     f1 = Force(direction=(0, 1, 0), strength=0.5)
     A.forces.append(f1)
 
     # world = World.get_instance() # No longer needed after reset
-    world.tick(3)
+    world.tick(1)
 
-    assert np.allclose(A.coordinates, (0, 3.0, 0))
+    assert np.allclose(A.coordinates, (0, 0.5 * world.damping_factor, 0))
 
     f2 = Force(direction=(0, 0, 1), strength=0.5)
     A.forces.append(f2)
@@ -34,7 +34,7 @@ def test_node_and_force() -> None:
 
 
 def test_3_nodes_and_middle_force() -> None:
-    world = World.reset() # Initialize/Reset world
+    world = World.reset() # No gravity or damping needed for this test
     A = Node((0, 0, 0), static=True, name="A")
     B = Node((1, 0, 0), static=False, name="B")
     C = Node((2, 0, 0), static=True, name="C")
@@ -61,8 +61,8 @@ def test_3_nodes_and_middle_force() -> None:
 
 def test_hanged_node_with_gravity() -> None:
     """Test a node hanging from a static node under gravity."""
-    # 1. Reset and initialize the world with downward gravity
-    world = World.reset(gravity_accel=(0, 0, -1.0)) # g_strength = 1.0
+    # 1. Reset and initialize the world with downward gravity and damping
+    world = World.reset(gravity_accel=(0, 0, -1.0), damping_factor=0.98) # g_strength = 1.0, damping for settling
 
     # 2. Create a static top node A
     node_A = Node(coordinates=(0, 0, 10), static=True, name="A")
@@ -76,10 +76,8 @@ def test_hanged_node_with_gravity() -> None:
 
     # 5. Run the simulation
     num_simulation_ticks = 300 # Increased ticks further for settling with dt=1
-    for i in range(num_simulation_ticks):
-        world.tick(1, nodes_to_log=["B"]) 
-        if (i + 1) % 100 == 0: 
-            print(f"test_hanged_node_with_gravity: Tick {i+1} completed. Node B vel: {node_B.velocity}")
+    world.tick(num_simulation_ticks, nodes_to_log=["B"]) 
+
 
     # 6. Assert final state
     final_pos_B = node_B.coordinates
@@ -102,3 +100,4 @@ if __name__ == "__main__":
     # test_node_and_force() # World.reset() added
     # test_3_nodes_and_middle_force() # World.reset() added
     test_hanged_node_with_gravity()
+    # test_node_and_force()

@@ -4,7 +4,7 @@ from sheet import Sheet
 def main():
     # Initialize the world with gravity
     # World.the_world = None # No longer needed due to World.reset() or World.init_world()
-    world = World.init_world(gravity_accel=(0, 0, -0.5)) # Use init_world or reset
+    world = World.init_world(gravity_accel=(0, 0, -0.5), damping_factor=0.98) # Use named params
     # To reset in subsequent runs or clear state: world = World.reset(gravity_accel=(0,0,-0.5))
     
     # Create a stretch function for the edges

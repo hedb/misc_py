@@ -156,7 +156,9 @@ class Node:
             acceleration = force_vector / self.mass
             
             self.velocity += acceleration * dt
-            self.velocity *= 0.98 # Simple damping factor
+            # Get damping factor from the world instance
+            world = World.get_instance()
+            self.velocity *= world.damping_factor 
             self.coordinates += self.velocity * dt
 
 
@@ -291,42 +293,61 @@ class Force:
 class World:
     the_world: Optional["World"] = None
 
-    def __init__(self, gravity_accel: Optional[Coordinate] = None) -> None:
-        """Initialize the world. Should ideally be called via World.init_world()."""
+    def __init__(self, gravity_accel: Optional[Coordinate] = None, damping_factor: float = 1.0) -> None:
+        if World.the_world is not None:
+            raise RuntimeError(
+                "World instance already exists. Use World.reset() or World.get_instance()."
+            )
+        
         self.nodes: list[Node] = []
+        self.edges: list[Edge] = []
         self.gravity_effect: Optional[Force] = None
+        self.damping_factor: float = damping_factor # Added damping_factor
 
-        if gravity_accel:
-            g_vec = np.array(gravity_accel, dtype=float)
-            g_mag = np.linalg.norm(g_vec)
-            if g_mag > 0:
-                self.gravity_effect = Force(direction=tuple(g_vec / g_mag), strength=g_mag)
-            # If g_mag is 0, gravity_effect remains None (no gravity)
+        if gravity_accel is not None:
+            # Gravity is an acceleration. To make it a force, we'd multiply by mass,
+            # but here we store it as a 'template' force with strength 1,
+            # and mass is applied in Node.calculate_net_force.
+            # The direction is the accel direction, strength is its magnitude.
+            # This might be confusing; a better name might be gravity_acceleration_template.
+            # For now, gravity_effect acts as a normalized direction vector for gravity,
+            # and its strength component is the magnitude of g.
+            g_strength = np.linalg.norm(np.array(gravity_accel))
+            if g_strength > 0:
+                self.gravity_effect = Force(direction=gravity_accel, strength=g_strength)
+            else:
+                self.gravity_effect = None # No gravity if (0,0,0)
+        else:
+            self.gravity_effect = None
+        
+        World.the_world = self
 
     @classmethod
-    def init_world(cls, gravity_accel: Optional[Coordinate] = None) -> "World":
-        """Initializes the singleton World instance. Raises error if already initialized."""
+    def init_world(cls, *, gravity_accel: Optional[Coordinate] = None, damping_factor: float = 1.0) -> "World":
         if cls.the_world is not None:
-            raise RuntimeError("World already initialized. Use World.reset() to re-initialize.")
-        cls.the_world = World(gravity_accel=gravity_accel)
+            print("Warning: World instance already exists. Resetting and re-initializing.")
+            cls.reset(gravity_accel=gravity_accel, damping_factor=damping_factor)
+        else:
+            cls.the_world = World(gravity_accel=gravity_accel, damping_factor=damping_factor)
         return cls.the_world
 
     @classmethod
     def get_instance(cls) -> "World":
-        """Gets the singleton World instance. Raises error if not initialized."""
         if cls.the_world is None:
-            raise RuntimeError(
-                "World not initialized. Call World.init_world() or World.reset() first."
-            )
+            # Default initialization if get_instance is called before init_world
+            # This ensures a world always exists but might not be configured as expected.
+            # Consider if this is the desired behavior or if it should raise an error.
+            # For now, let's initialize with defaults to prevent crashes.
+            print("Warning: World.get_instance() called before init_world. Initializing with defaults.")
+            cls.the_world = World(damping_factor=1.0) # Default damping
         return cls.the_world
-    
-    @classmethod
-    def reset(cls, gravity_accel: Optional[Coordinate] = None) -> "World":
-        """Resets the world and returns a new initialized instance."""
-        cls.the_world = None
-        return cls.init_world(gravity_accel=gravity_accel)
 
-    def render(self, *, pause: bool = False, delay: float = 0.0) -> None:
+    @classmethod
+    def reset(cls, *, gravity_accel: Optional[Coordinate] = None, damping_factor: float = 1.0) -> "World":
+        cls.the_world = None
+        return cls.init_world(gravity_accel=gravity_accel, damping_factor=damping_factor)
+
+    def render(self, *, pause: bool = True, delay: float = 0.0) -> None: # Modified signature
         if not self.nodes:
             return
 

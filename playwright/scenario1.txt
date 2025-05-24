@@ -1,0 +1,5 @@
+-- please open @https://haaretz.co.il/ 
+-- click on the search button up left
+-- insert "חיים לוינסון" to the search box
+-- verify that are at least 3 articles shown
+-- output the top one

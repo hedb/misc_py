@@ -1,0 +1,23 @@
+{
+  "name": "misc_py",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hedb/misc_py.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hedb/misc_py/issues"
+  },
+  "homepage": "https://github.com/hedb/misc_py#readme",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

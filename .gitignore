@@ -8,3 +8,4 @@ test.csv
 .DS_Store
 /lamp_chrono
 /lamp_sofa
+/node_modules
